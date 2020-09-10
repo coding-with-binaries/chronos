@@ -3,7 +3,7 @@ package com.manager.timezone.timezonemanagerserver.dto;
 public class AuthenticateUserResponseDto {
     private String accessToken;
 
-    private String tokenType = "auth-token";
+    private String tokenType = "Authorization";
 
     public AuthenticateUserResponseDto(String accessToken) {
         this.accessToken = accessToken;

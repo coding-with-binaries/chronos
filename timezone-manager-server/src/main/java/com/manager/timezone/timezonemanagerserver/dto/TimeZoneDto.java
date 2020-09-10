@@ -1,6 +1,6 @@
 package com.manager.timezone.timezonemanagerserver.dto;
 
-public class TimeZoneDto {
+public class TimeZoneDto extends BaseDto {
     private String timeZoneName;
 
     private String locationName;

@@ -25,8 +25,8 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
     private static final String[] AUTH_WHITELIST = {
             // Swagger UI
-            "/v3/api-docs", "/swagger-resources", "/swagger-resources/**", "/configuration/ui",
-            "/configuration/security", "/swagger-ui/index.html", "/webjars/**",
+            "/v2/api-docs", "/swagger-resources", "/swagger-resources/**", "/configuration/ui",
+            "/configuration/security", "/swagger-ui.html", "/webjars/**",
             // Other White Listed Paths
             "/", "/favicon.ico", "/**/*.png", "/**/*.gif", "/**/*.svg", "/**/*.jpg", "/**/*.html", "/**/*.css",
             "/**/*.js"};

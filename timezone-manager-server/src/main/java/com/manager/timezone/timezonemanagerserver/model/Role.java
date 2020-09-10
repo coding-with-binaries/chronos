@@ -1,15 +1,13 @@
 package com.manager.timezone.timezonemanagerserver.model;
 
+import com.manager.timezone.timezonemanagerserver.dto.RoleType;
+
 import javax.persistence.Entity;
 import javax.persistence.Table;
 
 @Table(name = "roles")
 @Entity
 public class Role extends BaseEntity {
-    public enum RoleType {
-        admin, user_manager, user
-    }
-
     private RoleType type;
 
     public RoleType getType() {

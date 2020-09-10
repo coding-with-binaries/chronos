@@ -28,6 +28,10 @@ public class AuthUserDetails implements UserDetails {
         return user.getUid();
     }
 
+    public User getUser() {
+        return user;
+    }
+
     @Override
     public String getPassword() {
         return user.getPassword();
