@@ -1,10 +1,17 @@
 package com.manager.timezone.timezonemanagerserver.dto;
 
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Pattern;
+
 public class TimeZoneDto extends BaseDto {
+    @NotBlank(message = "Time Zone Name cannot be blank")
     private String timeZoneName;
 
+    @NotBlank(message = "Time Zone Location cannot be blank")
     private String locationName;
 
+    @Pattern(regexp = "^(?:Z|[+-](?:2[0-3]|[01][0-9]):[0-5][0-9])$", message = "Must be a valid time zone difference")
+    @NotBlank(message = "Difference From GMT cannot be blank")
     private String differenceFromGmt;
 
     public String getTimeZoneName() {
