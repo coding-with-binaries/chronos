@@ -25,6 +25,28 @@ public class UserController {
     @Autowired
     private UserService userService;
 
+    @ApiOperation(value = "Who Am I?")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK", response = WhoAmIDto.class),
+            @ApiResponse(code = 401, message = "Unauthorized", response = ErrorResponseDto.class),
+            @ApiResponse(code = 500, message = "Internal Server Error", response = ErrorResponseDto.class)
+    })
+    @GetMapping(value = ServerUri.WHO_AM_I_URI)
+    public ResponseEntity<?> whoAmI() {
+        try {
+            WhoAmIDto whoAmIDto = userService.whoAmI();
+            if (whoAmIDto == null) {
+                ErrorResponseDto errorResponseDto =
+                        new ErrorResponseDto(HttpStatus.UNAUTHORIZED, "User is unauthenticated");
+                return new ResponseEntity<>(errorResponseDto, HttpStatus.UNAUTHORIZED);
+            }
+            return new ResponseEntity<>(whoAmIDto, HttpStatus.OK);
+        } catch (Exception e) {
+            ErrorResponseDto errorResponseDto = new ErrorResponseDto(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
+            return new ResponseEntity<>(errorResponseDto, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
     @ApiOperation(value = "Authenticate user")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK", response = AuthenticateUserResponseDto.class),
@@ -115,7 +137,7 @@ public class UserController {
 
     @ApiOperation(value = "Update user")
     @ApiResponses(value = {
-            @ApiResponse(code = 204, message = "No Content", response = TimeZoneDto.class),
+            @ApiResponse(code = 200, message = "OK", response = UserDto.class),
             @ApiResponse(code = 401, message = "Unauthorized", response = ErrorResponseDto.class),
             @ApiResponse(code = 404, message = "Not Found", response = ErrorResponseDto.class),
             @ApiResponse(code = 500, message = "Internal Server Error", response = ErrorResponseDto.class)
@@ -124,8 +146,8 @@ public class UserController {
     public ResponseEntity<?> updateUser(@PathVariable String uid,
             @RequestBody UpdateUserRequestDto updateUserRequestDto) {
         try {
-            userService.updateUser(UUID.fromString(uid), updateUserRequestDto);
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+            UserDto updatedUser = userService.updateUser(UUID.fromString(uid), updateUserRequestDto);
+            return new ResponseEntity<>(updatedUser, HttpStatus.OK);
         } catch (OperationForbiddenException e) {
             ErrorResponseDto errorResponseDto = new ErrorResponseDto(HttpStatus.UNAUTHORIZED, e.getMessage());
             return new ResponseEntity<>(errorResponseDto, HttpStatus.UNAUTHORIZED);
@@ -146,7 +168,7 @@ public class UserController {
             @ApiResponse(code = 500, message = "Internal Server Error", response = ErrorResponseDto.class)
     })
     @DeleteMapping(ServerUri.RESOURCE_UID_URI)
-    public ResponseEntity<?> deleteTimeZone(@PathVariable String uid) {
+    public ResponseEntity<?> deleteUser(@PathVariable String uid) {
         try {
             userService.deleteUser(UUID.fromString(uid));
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);

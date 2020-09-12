@@ -25,6 +25,7 @@ import java.util.Collections;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -60,6 +61,20 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public WhoAmIDto whoAmI() {
+        UserDto currentAuthenticatedUser = getCurrentAuthenticatedUser();
+        if(currentAuthenticatedUser==null) {
+            return null;
+        }
+        WhoAmIDto whoAmI = new WhoAmIDto();
+        whoAmI.setUsername(currentAuthenticatedUser.getUsername());
+        Set<RoleType> roles =
+                currentAuthenticatedUser.getRoles().stream().map(RoleDto::getType).collect(Collectors.toSet());
+        whoAmI.setRoles(roles);
+        return whoAmI;
+    }
+
+    @Override
     public AuthenticateUserResponseDto authenticateUser(AuthenticateUserRequestDto authenticateUserRequestDto) {
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(authenticateUserRequestDto.getUsername(),
@@ -68,7 +83,10 @@ public class UserServiceImpl implements UserService {
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
         String jwt = tokenProvider.generateToken(authentication);
-        return new AuthenticateUserResponseDto(jwt);
+        UserDto currentAuthenticatedUser = getCurrentAuthenticatedUser();
+        Set<RoleType> roles =
+                currentAuthenticatedUser.getRoles().stream().map(RoleDto::getType).collect(Collectors.toSet());
+        return new AuthenticateUserResponseDto(jwt, currentAuthenticatedUser.getUsername(), roles);
 
     }
 
@@ -193,7 +211,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void updateUser(UUID uid, UpdateUserRequestDto updateUserRequestDto)
+    public UserDto updateUser(UUID uid, UpdateUserRequestDto updateUserRequestDto)
             throws OperationForbiddenException, ResourceNotFoundException {
         UserDto currentAuthenticatedUser = getCurrentAuthenticatedUser();
         if (currentAuthenticatedUser == null) {
@@ -208,7 +226,7 @@ public class UserServiceImpl implements UserService {
             if (currentAuthenticatedUser.getUsername().equals(owner) ||
                     currentAuthenticatedUser.getUsername().equals(username) || UserUtil.hasAdminAuthority(roles)) {
                 user.setPassword(updateUserRequestDto.getPassword());
-                userRepository.save(user);
+                return UserUtil.convertUserToDto(userRepository.save(user));
             } else {
                 throw new OperationForbiddenException("User: " + currentAuthenticatedUser.getUsername() +
                         " does not have the authorization to update the user.");

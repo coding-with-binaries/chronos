@@ -3,6 +3,7 @@ package com.manager.timezone.timezonemanagerserver.util;
 import com.manager.timezone.timezonemanagerserver.dto.RoleDto;
 import com.manager.timezone.timezonemanagerserver.dto.RoleType;
 import com.manager.timezone.timezonemanagerserver.dto.UserDto;
+import com.manager.timezone.timezonemanagerserver.model.Role;
 import com.manager.timezone.timezonemanagerserver.model.User;
 import org.modelmapper.ModelMapper;
 

@@ -13,6 +13,8 @@ public interface UserService {
 
     UserDto getCurrentAuthenticatedUser();
 
+    WhoAmIDto whoAmI();
+
     AuthenticateUserResponseDto authenticateUser(AuthenticateUserRequestDto authenticateUserRequestDto);
 
     RegisterUserResponseDto registerUser(RegisterUserRequestDto registerUserRequestDto)
@@ -24,7 +26,7 @@ public interface UserService {
     RegisterUserResponseDto registerAdmin(RegisterUserRequestDto registerUserRequestDto)
             throws UserExistsException, OperationForbiddenException;
 
-    void updateUser(UUID uid, UpdateUserRequestDto updateUserRequestDto)
+    UserDto updateUser(UUID uid, UpdateUserRequestDto updateUserRequestDto)
             throws OperationForbiddenException, ResourceNotFoundException;
 
     void deleteUser(UUID uid) throws OperationForbiddenException, ResourceNotFoundException;

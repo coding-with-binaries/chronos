@@ -9,6 +9,7 @@ public interface ServerUri {
     String RESOURCE_UID_URI = "/{uid}";
 
     String AUTH_URI = "/auth";
+    String WHO_AM_I_URI = AUTH_URI + "/who-am-i";
     String SIGN_IN_URI = AUTH_URI + "/sign-in";
     String SIGN_UP_URI = AUTH_URI + "/sign-up";
 
