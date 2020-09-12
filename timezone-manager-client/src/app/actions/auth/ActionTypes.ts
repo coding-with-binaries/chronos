@@ -60,6 +60,14 @@ export interface GetCurrentUserSuccess {
   };
 }
 
+export interface SignOutUser {
+  type: Actions.SIGN_OUT_USER;
+}
+
+export interface SignOutUserSuccess {
+  type: Actions.SIGN_OUT_USER_SUCCESS;
+}
+
 export type AuthAction =
   | AuthenticateUser
   | AuthenticateUserFailed
@@ -69,4 +77,6 @@ export type AuthAction =
   | RegisterUserSuccess
   | GetCurrentUser
   | GetCurrentUserFailed
-  | GetCurrentUserSuccess;
+  | GetCurrentUserSuccess
+  | SignOutUser
+  | SignOutUserSuccess;

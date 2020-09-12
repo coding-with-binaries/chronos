@@ -6,9 +6,10 @@ import {
   authenticateUserSuccess,
   getCurrentUserFailed,
   getCurrentUserSuccess,
-  registerUserSuccess
+  registerUserSuccess,
+  signOutUserSuccess
 } from '../actions/auth/Actions';
-import { AuthenticateUser } from '../actions/auth/ActionTypes';
+import { AuthenticateUser, SignOutUser } from '../actions/auth/ActionTypes';
 import UserApi from '../api/user/User';
 import { AuthResponseDto, AuthUser } from '../types/Auth';
 import { ErrorResponse } from '../types/Common';
@@ -69,10 +70,25 @@ function* watchForUserRegistration() {
   yield takeLatest(Actions.REGISTER_USER, registerUserSaga);
 }
 
+function* signOutUserSaga(action: SignOutUser) {
+  try {
+    yield call(UserApi.signOutUser);
+    yield put(signOutUserSuccess());
+    yield put(push('/sign-in'));
+  } catch (e) {
+    // Should never come here
+  }
+}
+
+function* watchForUserSignOut() {
+  yield takeLatest(Actions.SIGN_OUT_USER, signOutUserSaga);
+}
+
 export default function* authSaga() {
   yield all([
     watchForGetCurrentUser(),
     watchForUserAuthentication(),
-    watchForUserRegistration()
+    watchForUserRegistration(),
+    watchForUserSignOut()
   ]);
 }

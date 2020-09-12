@@ -2,7 +2,7 @@ import { LockOutlined, UserOutlined } from '@ant-design/icons';
 import { Alert, Button, Form, Input } from 'antd';
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Link, useHistory, useLocation } from 'react-router-dom';
+import { Link, Redirect, useHistory, useLocation } from 'react-router-dom';
 import { Dispatch } from 'redux';
 import { authenticateUser } from '../../actions/auth/Actions';
 import { AuthAction } from '../../actions/auth/ActionTypes';
@@ -15,7 +15,7 @@ const SignIn: React.FC = () => {
   const history = useHistory();
   const isRegistered = search === '?registered=true';
 
-  const { error } = useSelector<StoreState, Auth>(s => s.auth);
+  const { authUser, error } = useSelector<StoreState, Auth>(s => s.auth);
 
   const dispatch = useDispatch<Dispatch<AuthAction>>();
 
@@ -28,11 +28,23 @@ const SignIn: React.FC = () => {
     history.replace('/sign-in');
   };
 
+  if (authUser) {
+    return <Redirect to="/" />;
+  }
+
   return (
     <div id="timezone-manager-signin">
       <div id="signin-container">
-        {error && (
-          <Alert message={error.message} type="error" showIcon closable />
+        {error && error.statusCode !== 401 && (
+          <Alert
+            message={
+              error.message ||
+              'Something went wrong! Please check your connection and try again!'
+            }
+            type="error"
+            showIcon
+            closable
+          />
         )}
         {isRegistered && (
           <Alert

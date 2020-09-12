@@ -10,7 +10,9 @@ import {
   GetCurrentUserSuccess,
   RegisterUser,
   RegisterUserFailed,
-  RegisterUserSuccess
+  RegisterUserSuccess,
+  SignOutUser,
+  SignOutUserSuccess
 } from './ActionTypes';
 
 export const authenticateUser = (
@@ -67,4 +69,12 @@ export const getCurrentUserSuccess = (
 ): GetCurrentUserSuccess => ({
   type: Actions.GET_CURRENT_USER_SUCCESS,
   payload: { authUser }
+});
+
+export const signOutUser = (): SignOutUser => ({
+  type: Actions.SIGN_OUT_USER
+});
+
+export const signOutUserSuccess = (): SignOutUserSuccess => ({
+  type: Actions.SIGN_OUT_USER_SUCCESS
 });

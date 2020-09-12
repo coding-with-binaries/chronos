@@ -38,6 +38,12 @@ const authReducer = (
 
       case Actions.REGISTER_USER_SUCCESS: {
         draft.asyncState = AsyncState.Completed;
+        break;
+      }
+
+      case Actions.SIGN_OUT_USER: {
+        draft.authUser = null;
+        break;
       }
       // no default
     }

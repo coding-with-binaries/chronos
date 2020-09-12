@@ -1,0 +1,30 @@
+#timezone-manager-main,
+#timezone-manager-main > #timezone-manager-layout,
+#timezone-manager-main #timezone-manager-content {
+  height: 100%;
+}
+
+#timezone-manager-main .ant-menu::before {
+  display: unset;
+}
+
+#timezone-manager-main #timezone-manager-content {
+  padding: 24px 50px;
+}
+
+#timezone-manager-main #timezone-manager-footer {
+  background: #e2e2e2;
+}
+
+#timezone-manager-main .logo {
+  height: 32px;
+  background: rgba(255, 255, 255, 0.2);
+  margin: 16px;
+}
+
+#timezone-manager-main .sign-out {
+  cursor: pointer;
+  float: right;
+  color: white;
+  font-size: 14px;
+}
