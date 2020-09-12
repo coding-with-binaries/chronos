@@ -1,19 +1,12 @@
 package com.manager.timezone.timezonemanagerserver.dto;
 
-import java.util.UUID;
+import java.util.Set;
 
 public class RegisterUserResponseDto {
-    private UUID uid;
 
     private String username;
 
-    public UUID getUid() {
-        return uid;
-    }
-
-    public void setUid(UUID uid) {
-        this.uid = uid;
-    }
+    private Set<RoleType> roles;
 
     public String getUsername() {
         return username;
@@ -21,5 +14,13 @@ public class RegisterUserResponseDto {
 
     public void setUsername(String username) {
         this.username = username;
+    }
+
+    public Set<RoleType> getRoles() {
+        return roles;
+    }
+
+    public void setRoles(Set<RoleType> roles) {
+        this.roles = roles;
     }
 }

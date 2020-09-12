@@ -1,14 +1,19 @@
 import React from 'react';
 import { Route, Switch } from 'react-router-dom';
-import Login from './components/login/Login';
 import Main from './components/Main';
+import SignIn from './components/sign-in/SignIn';
+import SignUp from './components/sign-up/SignUp';
+import './index.css';
 
 const App: React.FC = () => {
   return (
-    <div className="timezone-manager-app">
+    <div id="timezone-manager-app">
       <Switch>
-        <Route path="/login">
-          <Login />
+        <Route path="/sign-in">
+          <SignIn />
+        </Route>
+        <Route path="/sign-up">
+          <SignUp />
         </Route>
         <Route path="/">
           <Main />

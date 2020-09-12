@@ -7,7 +7,10 @@ import {
   AuthenticateUserSuccess,
   GetCurrentUser,
   GetCurrentUserFailed,
-  GetCurrentUserSuccess
+  GetCurrentUserSuccess,
+  RegisterUser,
+  RegisterUserFailed,
+  RegisterUserSuccess
 } from './ActionTypes';
 
 export const authenticateUser = (
@@ -25,10 +28,27 @@ export const authenticateUserFailed = (
 });
 
 export const authenticateUserSuccess = (
+  accessToken: string,
   authUser: AuthUser
 ): AuthenticateUserSuccess => ({
   type: Actions.AUTHENTICATE_USER_SUCCESS,
-  payload: { authUser }
+  payload: { accessToken, authUser }
+});
+
+export const registerUser = (authRequestDto: AuthRequestDto): RegisterUser => ({
+  type: Actions.REGISTER_USER,
+  payload: { authRequestDto }
+});
+
+export const registerUserFailed = (
+  errorResponse: ErrorResponse
+): RegisterUserFailed => ({
+  type: Actions.REGISTER_USER_FAILED,
+  payload: { errorResponse }
+});
+
+export const registerUserSuccess = (): RegisterUserSuccess => ({
+  type: Actions.REGISTER_USER_SUCCESS
 });
 
 export const getCurrentUser = (): GetCurrentUser => ({

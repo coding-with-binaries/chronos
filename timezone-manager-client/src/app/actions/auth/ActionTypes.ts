@@ -19,8 +19,27 @@ export interface AuthenticateUserFailed {
 export interface AuthenticateUserSuccess {
   type: Actions.AUTHENTICATE_USER_SUCCESS;
   payload: {
+    accessToken: string;
     authUser: AuthUser;
   };
+}
+
+export interface RegisterUser {
+  type: Actions.REGISTER_USER;
+  payload: {
+    authRequestDto: AuthRequestDto;
+  };
+}
+
+export interface RegisterUserFailed {
+  type: Actions.REGISTER_USER_FAILED;
+  payload: {
+    errorResponse: ErrorResponse;
+  };
+}
+
+export interface RegisterUserSuccess {
+  type: Actions.REGISTER_USER_SUCCESS;
 }
 
 export interface GetCurrentUser {
@@ -45,6 +64,9 @@ export type AuthAction =
   | AuthenticateUser
   | AuthenticateUserFailed
   | AuthenticateUserSuccess
+  | RegisterUser
+  | RegisterUserFailed
+  | RegisterUserSuccess
   | GetCurrentUser
   | GetCurrentUserFailed
   | GetCurrentUserSuccess;

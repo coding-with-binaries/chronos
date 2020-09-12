@@ -1,0 +1,20 @@
+#timezone-manager-signup {
+  height: 100%;
+  width: 100%;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#timezone-manager-signup > #signup-container {
+  padding: 48px 60px;
+  min-width: 480px;
+  border: 2px solid #1790ff;
+  border-radius: 4px;
+}
+
+#signup-container .signup-form-button {
+  width: 100%;
+  margin-bottom: 1rem;
+}

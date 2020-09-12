@@ -1,5 +1,5 @@
+import { Spin } from 'antd';
 import React, { useEffect } from 'react';
-import Spinner from 'react-bootstrap/Spinner';
 import { useDispatch, useSelector } from 'react-redux';
 import { Redirect, Route, Switch, useLocation } from 'react-router-dom';
 import { Dispatch } from 'redux';
@@ -8,7 +8,7 @@ import { AuthAction } from '../actions/auth/ActionTypes';
 import { StoreState } from '../types';
 import { Auth } from '../types/Auth';
 import { AsyncState } from '../types/Common';
-import { hasUserManagerRoles } from '../utils/aut-utils';
+import { hasUserManagerRoles } from '../utils/auth-utils';
 import TimeZones from './time-zones/TimeZones';
 import Users from './users/Users';
 
@@ -29,18 +29,14 @@ const Main: React.FC = () => {
       asyncState === AsyncState.NotStarted ||
       asyncState === AsyncState.Fetching
     ) {
-      return (
-        <Spinner animation="border" role="status">
-          <span className="sr-only">Validating Current User...</span>
-        </Spinner>
-      );
+      return <Spin size="large" />;
     }
 
     if (asyncState === AsyncState.Failed) {
       return (
         <Redirect
           to={{
-            pathname: '/login',
+            pathname: '/sign-in',
             state: { from: location }
           }}
         />
@@ -66,7 +62,7 @@ const Main: React.FC = () => {
     }
   };
 
-  return <div className="timezone-manager-main">{renderContent()}</div>;
+  return <div id="timezone-manager-main">{renderContent()}</div>;
 };
 
 export default Main;

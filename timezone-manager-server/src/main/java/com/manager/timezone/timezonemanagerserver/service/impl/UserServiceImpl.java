@@ -63,7 +63,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public WhoAmIDto whoAmI() {
         UserDto currentAuthenticatedUser = getCurrentAuthenticatedUser();
-        if(currentAuthenticatedUser==null) {
+        if (currentAuthenticatedUser == null) {
             return null;
         }
         WhoAmIDto whoAmI = new WhoAmIDto();
@@ -121,11 +121,11 @@ public class UserServiceImpl implements UserService {
 
         user.setRoles(Collections.singleton(role));
 
-        userRepository.save(user);
+        userRepository.saveAndFlush(user);
 
         RegisterUserResponseDto registerUserResponseDto = new RegisterUserResponseDto();
-        registerUserResponseDto.setUid(user.getUid());
         registerUserResponseDto.setUsername(user.getUsername());
+        registerUserResponseDto.setRoles(Collections.singleton(RoleType.user));
 
         return registerUserResponseDto;
     }
@@ -161,11 +161,11 @@ public class UserServiceImpl implements UserService {
 
         user.setRoles(Collections.singleton(role));
 
-        userRepository.save(user);
+        userRepository.saveAndFlush(user);
 
         RegisterUserResponseDto registerUserResponseDto = new RegisterUserResponseDto();
-        registerUserResponseDto.setUid(user.getUid());
         registerUserResponseDto.setUsername(user.getUsername());
+        registerUserResponseDto.setRoles(Collections.singleton(RoleType.user_manager));
 
         return registerUserResponseDto;
     }
@@ -201,11 +201,11 @@ public class UserServiceImpl implements UserService {
 
         user.setRoles(Collections.singleton(role));
 
-        userRepository.save(user);
+        userRepository.saveAndFlush(user);
 
         RegisterUserResponseDto registerUserResponseDto = new RegisterUserResponseDto();
-        registerUserResponseDto.setUid(user.getUid());
         registerUserResponseDto.setUsername(user.getUsername());
+        registerUserResponseDto.setRoles(Collections.singleton(RoleType.admin));
 
         return registerUserResponseDto;
     }

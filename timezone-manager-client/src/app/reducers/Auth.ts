@@ -12,6 +12,7 @@ const authReducer = (
   return produce<Auth, Auth>(state, draft => {
     switch (action.type) {
       case Actions.AUTHENTICATE_USER:
+      case Actions.REGISTER_USER:
       case Actions.GET_CURRENT_USER: {
         draft.error = undefined;
         draft.asyncState = AsyncState.Fetching;
@@ -19,6 +20,7 @@ const authReducer = (
       }
 
       case Actions.AUTHENTICATE_USER_FAILED:
+      case Actions.REGISTER_USER_FAILED:
       case Actions.GET_CURRENT_USER_FAILED: {
         const { errorResponse } = action.payload;
         draft.error = errorResponse;
@@ -32,6 +34,10 @@ const authReducer = (
         draft.authUser = authUser;
         draft.asyncState = AsyncState.Completed;
         break;
+      }
+
+      case Actions.REGISTER_USER_SUCCESS: {
+        draft.asyncState = AsyncState.Completed;
       }
       // no default
     }

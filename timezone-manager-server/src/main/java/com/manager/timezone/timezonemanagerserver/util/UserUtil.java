@@ -1,8 +1,6 @@
 package com.manager.timezone.timezonemanagerserver.util;
 
-import com.manager.timezone.timezonemanagerserver.dto.RoleDto;
-import com.manager.timezone.timezonemanagerserver.dto.RoleType;
-import com.manager.timezone.timezonemanagerserver.dto.UserDto;
+import com.manager.timezone.timezonemanagerserver.dto.*;
 import com.manager.timezone.timezonemanagerserver.model.Role;
 import com.manager.timezone.timezonemanagerserver.model.User;
 import org.modelmapper.ModelMapper;
@@ -18,6 +16,12 @@ public class UserUtil {
     public static User convertDtoToUser(UserDto userDto) {
         ModelMapper mapper = new ModelMapper();
         return mapper.map(userDto, User.class);
+    }
+
+    public static RegisterUserResponseDto convertAuthenticateToRegisterResponse(
+            AuthenticateUserResponseDto authenticateUserResponseDto) {
+        ModelMapper mapper = new ModelMapper();
+        return mapper.map(authenticateUserResponseDto, RegisterUserResponseDto.class);
     }
 
     public static boolean hasUserManagementAuthority(Set<RoleDto> roles) {

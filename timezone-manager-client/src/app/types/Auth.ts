@@ -1,7 +1,7 @@
 import { AsyncState, ErrorResponse } from './Common';
 
 export interface AuthRequestDto {
-  user: string;
+  username: string;
   password: string;
 }
 

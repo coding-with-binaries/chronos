@@ -1,6 +1,6 @@
 import { AuthRequestDto, AuthResponseDto, AuthUser } from '../../types/Auth';
 import Http from '../Http';
-import { SIGN_IN_URI, WHO_AM_I_URI } from './Uri';
+import { SIGN_IN_URI, SIGN_UP_URI, WHO_AM_I_URI } from './Uri';
 
 export default class UserApi {
   public static async authenticateUser(authRequestDto: AuthRequestDto) {
@@ -9,6 +9,10 @@ export default class UserApi {
       authRequestDto
     );
     return response.data;
+  }
+
+  public static async registerUser(authRequestDto: AuthRequestDto) {
+    await Http.post(SIGN_UP_URI, authRequestDto);
   }
 
   public static async whoAmI() {
