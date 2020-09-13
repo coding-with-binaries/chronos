@@ -1,5 +1,7 @@
-import { Auth } from './Auth';
+import { AuthStore } from './Auth';
+import { TimeZonesStore } from './TimeZones';
 
 export interface StoreState {
-  auth: Auth;
+  authStore: AuthStore;
+  timeZonesStore: TimeZonesStore;
 }

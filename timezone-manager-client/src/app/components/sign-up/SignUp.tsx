@@ -7,11 +7,13 @@ import { Dispatch } from 'redux';
 import { registerUser } from '../../actions/auth/Actions';
 import { AuthAction } from '../../actions/auth/ActionTypes';
 import { StoreState } from '../../types';
-import { Auth, AuthRequestDto } from '../../types/Auth';
+import { AuthRequestDto, AuthStore } from '../../types/Auth';
 import './SignUp.css';
 
 const SignIn: React.FC = () => {
-  const { authUser, error } = useSelector<StoreState, Auth>(s => s.auth);
+  const { authUser, error } = useSelector<StoreState, AuthStore>(
+    s => s.authStore
+  );
 
   const dispatch = useDispatch<Dispatch<AuthAction>>();
 

@@ -2,14 +2,14 @@ import produce from 'immer';
 import * as Actions from '../actions/auth/ActionConstants';
 import { AuthAction } from '../actions/auth/ActionTypes';
 import { initialState } from '../constants/InitialState';
-import { Auth } from '../types/Auth';
+import { AuthStore } from '../types/Auth';
 import { AsyncState } from '../types/Common';
 
 const authReducer = (
-  state: Auth = initialState.auth,
+  state: AuthStore = initialState.authStore,
   action: AuthAction
-): Auth => {
-  return produce<Auth, Auth>(state, draft => {
+): AuthStore => {
+  return produce<AuthStore, AuthStore>(state, draft => {
     switch (action.type) {
       case Actions.AUTHENTICATE_USER:
       case Actions.REGISTER_USER:

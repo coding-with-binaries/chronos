@@ -22,7 +22,7 @@
   margin: 16px;
 }
 
-#timezone-manager-main .sign-out {
+#timezone-manager-main .user-dropdown-menu {
   cursor: pointer;
   float: right;
   color: white;

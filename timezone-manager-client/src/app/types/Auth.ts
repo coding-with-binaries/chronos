@@ -22,7 +22,7 @@ export interface AuthUser {
   roles: Role[];
 }
 
-export interface Auth {
+export interface AuthStore {
   asyncState: AsyncState;
   accessToken: string | null;
   error?: ErrorResponse;

@@ -2,9 +2,13 @@ import { StoreState } from '../types';
 import { AsyncState } from '../types/Common';
 
 export const initialState: StoreState = {
-  auth: {
+  authStore: {
     accessToken: null,
     authUser: null,
     asyncState: AsyncState.NotStarted
+  },
+  timeZonesStore: {
+    asyncState: AsyncState.NotStarted,
+    timeZones: []
   }
 };

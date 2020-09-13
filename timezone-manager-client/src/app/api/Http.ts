@@ -16,6 +16,16 @@ class Http {
     const headers = this.getHeaders();
     return axios.post<T>(url, data, { headers });
   }
+
+  public put<T>(url: string, data?: any) {
+    const headers = this.getHeaders();
+    return axios.put<T>(url, data, { headers });
+  }
+
+  public delete<T>(url: string) {
+    const headers = this.getHeaders();
+    return axios.delete<T>(url, { headers });
+  }
 }
 
 export default new Http();

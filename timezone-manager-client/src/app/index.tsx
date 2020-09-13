@@ -9,11 +9,11 @@ import SignIn from './components/sign-in/SignIn';
 import SignUp from './components/sign-up/SignUp';
 import './index.css';
 import { StoreState } from './types';
-import { Auth } from './types/Auth';
+import { AuthStore } from './types/Auth';
 import { AsyncState } from './types/Common';
 
 const App: React.FC = () => {
-  const { asyncState } = useSelector<StoreState, Auth>(s => s.auth);
+  const { asyncState } = useSelector<StoreState, AuthStore>(s => s.authStore);
 
   const dispatch = useDispatch<Dispatch<AuthAction>>();
   useEffect(() => {

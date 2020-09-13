@@ -7,7 +7,7 @@ import { Dispatch } from 'redux';
 import { authenticateUser } from '../../actions/auth/Actions';
 import { AuthAction } from '../../actions/auth/ActionTypes';
 import { StoreState } from '../../types';
-import { Auth, AuthRequestDto } from '../../types/Auth';
+import { AuthRequestDto, AuthStore } from '../../types/Auth';
 import './SignIn.css';
 
 const SignIn: React.FC = () => {
@@ -15,7 +15,9 @@ const SignIn: React.FC = () => {
   const history = useHistory();
   const isRegistered = search === '?registered=true';
 
-  const { authUser, error } = useSelector<StoreState, Auth>(s => s.auth);
+  const { authUser, error } = useSelector<StoreState, AuthStore>(
+    s => s.authStore
+  );
 
   const dispatch = useDispatch<Dispatch<AuthAction>>();
 

@@ -1,12 +1,14 @@
 import { connectRouter } from 'connected-react-router';
 import { History } from 'history';
 import { combineReducers } from 'redux';
-import auth from './Auth';
+import authReducer from './Auth';
+import timeZoneReducer from './TimeZones';
 
 const createRootReducer = (history: History) => {
   return combineReducers({
     router: connectRouter(history),
-    auth
+    authStore: authReducer,
+    timeZonesStore: timeZoneReducer
   });
 };
 
