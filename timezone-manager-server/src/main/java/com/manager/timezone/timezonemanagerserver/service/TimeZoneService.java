@@ -2,6 +2,7 @@ package com.manager.timezone.timezonemanagerserver.service;
 
 import com.manager.timezone.timezonemanagerserver.auth.AuthUserDetails;
 import com.manager.timezone.timezonemanagerserver.dto.TimeZoneDto;
+import com.manager.timezone.timezonemanagerserver.exception.InvalidResourceException;
 import com.manager.timezone.timezonemanagerserver.exception.OperationForbiddenException;
 import com.manager.timezone.timezonemanagerserver.exception.ResourceNotFoundException;
 
@@ -13,7 +14,9 @@ public interface TimeZoneService {
 
     List<TimeZoneDto> getAllAuthorizedTimeZones();
 
-    TimeZoneDto addTimeZone(TimeZoneDto timeZoneDto);
+    List<TimeZoneDto> getAllAuthorizedTimeZonesByName(String timeZoneName);
+
+    TimeZoneDto addTimeZone(TimeZoneDto timeZoneDto) throws InvalidResourceException;
 
     TimeZoneDto updateTimeZone(TimeZoneDto timeZoneDto) throws OperationForbiddenException, ResourceNotFoundException;
 

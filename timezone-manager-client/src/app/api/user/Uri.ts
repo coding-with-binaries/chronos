@@ -1,5 +1,7 @@
 export const USERS_URI = '/api/v1/users';
 
+export const USER_URI = (uid: string) => `${USERS_URI}/${uid}`;
+
 export const AUTH_URI = `${USERS_URI}/auth`;
 
 export const SIGN_IN_URI = `${AUTH_URI}/sign-in`;

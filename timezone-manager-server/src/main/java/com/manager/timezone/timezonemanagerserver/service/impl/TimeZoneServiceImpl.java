@@ -1,8 +1,10 @@
 package com.manager.timezone.timezonemanagerserver.service.impl;
 
+import com.manager.timezone.timezonemanagerserver.constants.TimeZoneConstants;
 import com.manager.timezone.timezonemanagerserver.dto.RoleDto;
 import com.manager.timezone.timezonemanagerserver.dto.TimeZoneDto;
 import com.manager.timezone.timezonemanagerserver.dto.UserDto;
+import com.manager.timezone.timezonemanagerserver.exception.InvalidResourceException;
 import com.manager.timezone.timezonemanagerserver.exception.OperationForbiddenException;
 import com.manager.timezone.timezonemanagerserver.exception.ResourceNotFoundException;
 import com.manager.timezone.timezonemanagerserver.model.TimeZone;
@@ -44,7 +46,24 @@ public class TimeZoneServiceImpl implements TimeZoneService {
     }
 
     @Override
-    public TimeZoneDto addTimeZone(TimeZoneDto timeZoneDto) {
+    public List<TimeZoneDto> getAllAuthorizedTimeZonesByName(String timeZoneName) {
+        UserDto currentUser = userService.getCurrentAuthenticatedUser();
+        if (currentUser != null) {
+            if (UserUtil.hasAdminAuthority(currentUser.getRoles())) {
+                return TimeZoneUtil.convertTimeZonesToDtoList(timeZoneRepository.findAllByTimeZoneName(timeZoneName));
+            }
+            return TimeZoneUtil.convertTimeZonesToDtoList(
+                    timeZoneRepository.findAllByCreatedByAndTimeZoneName(currentUser.getUsername(), timeZoneName));
+        }
+        return new ArrayList<>();
+    }
+
+    @Override
+    public TimeZoneDto addTimeZone(TimeZoneDto timeZoneDto) throws InvalidResourceException {
+        if (!TimeZoneConstants.VALID_TIME_ZONE_OFFSETS.contains(timeZoneDto.getDifferenceFromGmt())) {
+            throw new InvalidResourceException(
+                    "The time zone offset is not valid: " + timeZoneDto.getDifferenceFromGmt());
+        }
         TimeZone timeZone = TimeZoneUtil.convertDtoToTimeZone(timeZoneDto);
         return TimeZoneUtil.convertTimeZoneToDto(timeZoneRepository.save(timeZone));
     }

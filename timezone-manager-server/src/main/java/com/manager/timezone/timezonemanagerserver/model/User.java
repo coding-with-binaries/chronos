@@ -12,7 +12,9 @@ public class User extends BaseEntity {
 
     private String password;
 
-    private boolean isEnabled;
+    private boolean isEnabled = true;
+
+    private boolean isDeleted = false;
 
     @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JoinTable(
@@ -44,6 +46,14 @@ public class User extends BaseEntity {
 
     public void setEnabled(boolean enabled) {
         isEnabled = enabled;
+    }
+
+    public boolean isDeleted() {
+        return isDeleted;
+    }
+
+    public void setDeleted(boolean deleted) {
+        isDeleted = deleted;
     }
 
     public Set<Role> getRoles() {

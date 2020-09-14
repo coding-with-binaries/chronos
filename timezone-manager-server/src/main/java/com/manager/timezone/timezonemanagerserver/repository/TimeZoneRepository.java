@@ -8,4 +8,8 @@ import java.util.UUID;
 
 public interface TimeZoneRepository extends JpaRepository<TimeZone, UUID> {
     List<TimeZone> findAllByCreatedBy(String createdBy);
+
+    List<TimeZone> findAllByTimeZoneName(String timeZoneName);
+
+    List<TimeZone> findAllByCreatedByAndTimeZoneName(String createdBy, String timeZoneName);
 }

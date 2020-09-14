@@ -6,6 +6,7 @@ import { Link, Redirect } from 'react-router-dom';
 import { Dispatch } from 'redux';
 import { registerUser } from '../../actions/auth/Actions';
 import { AuthAction } from '../../actions/auth/ActionTypes';
+import { USERNAME_REGEX } from '../../constants/Regex';
 import { StoreState } from '../../types';
 import { AuthRequestDto, AuthStore } from '../../types/Auth';
 import './SignUp.css';
@@ -28,7 +29,7 @@ const SignIn: React.FC = () => {
   return (
     <div id="timezone-manager-signup">
       <div id="signup-container">
-        {error && (
+        {error && error.statusCode !== 401 && (
           <Alert
             message={
               error.message ||
@@ -48,7 +49,23 @@ const SignIn: React.FC = () => {
         >
           <Form.Item
             name="username"
-            rules={[{ required: true, message: 'Please input your Username!' }]}
+            hasFeedback
+            rules={[
+              { required: true, message: 'Please input your Username!' },
+              {
+                min: 6,
+                message: 'Username must contain minimum 6 characters!'
+              },
+              {
+                max: 20,
+                message: 'Username must contain maximum 20 characters!'
+              },
+              {
+                pattern: USERNAME_REGEX,
+                message:
+                  'Only (.) and (_) are allowed as special characters! These cannot be together!'
+              }
+            ]}
           >
             <Input prefix={<UserOutlined />} placeholder="Username" />
           </Form.Item>
@@ -59,7 +76,7 @@ const SignIn: React.FC = () => {
               { required: true, message: 'Please input your Password!' },
               {
                 min: 6,
-                message: 'Password should contain minimum 6 characters!'
+                message: 'Password must contain minimum 6 characters!'
               }
             ]}
           >

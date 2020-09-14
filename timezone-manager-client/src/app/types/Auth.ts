@@ -5,7 +5,7 @@ export interface AuthRequestDto {
   password: string;
 }
 
-export enum Role {
+export enum RoleType {
   admin = 'admin',
   user_manager = 'user_manager',
   user = 'user'
@@ -14,12 +14,12 @@ export enum Role {
 export interface AuthResponseDto {
   accessToken: string;
   username: string;
-  roles: Role[];
+  roles: RoleType[];
 }
 
 export interface AuthUser {
   username: string;
-  roles: Role[];
+  roles: RoleType[];
 }
 
 export interface AuthStore {

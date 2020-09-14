@@ -4,7 +4,11 @@ import { useDispatch } from 'react-redux';
 import { Dispatch } from 'redux';
 import { addTimeZone, editTimeZone } from '../../actions/time-zones/Actions';
 import { TimeZoneAction } from '../../actions/time-zones/ActionTypes';
-import { allTimeZones } from '../../constants/TimeZones';
+import {
+  TIME_ZONE_LOCATION_REGEX,
+  TIME_ZONE_NAME_REGEX
+} from '../../constants/Regex';
+import { validTimeZones } from '../../constants/TimeZones';
 import { UpdateTimeZoneDto } from '../../types/TimeZones';
 
 interface Props {
@@ -23,7 +27,6 @@ const UpdateTimeZoneModal: React.FC<Props> = props => {
 
   const onSubmit = async () => {
     try {
-      console.log(uid);
       const formValues = await form.validateFields();
       const updateTimeZoneDto: UpdateTimeZoneDto = {
         timeZoneName: formValues.timeZoneName,
@@ -59,7 +62,12 @@ const UpdateTimeZoneModal: React.FC<Props> = props => {
           name="timeZoneName"
           label="Time Zone Name"
           rules={[
-            { required: true, message: 'Please input the time zone name!' }
+            { required: true, message: 'Please input the time zone name!' },
+            {
+              pattern: TIME_ZONE_NAME_REGEX,
+              message:
+                'Time zone name can only have alphanumeric characters and a space!'
+            }
           ]}
         >
           <Input placeholder="Enter Time Zone Name here" />
@@ -67,7 +75,14 @@ const UpdateTimeZoneModal: React.FC<Props> = props => {
         <Form.Item
           name="locationName"
           label="City Name"
-          rules={[{ required: true, message: 'Please input the city name!' }]}
+          rules={[
+            { required: true, message: 'Please input the city name!' },
+            {
+              pattern: TIME_ZONE_LOCATION_REGEX,
+              message:
+                'Time zone city name can only have alphabets, space( ) and a comma(,)!'
+            }
+          ]}
         >
           <Input placeholder="Enter City Name here" />
         </Form.Item>
@@ -82,7 +97,7 @@ const UpdateTimeZoneModal: React.FC<Props> = props => {
           ]}
         >
           <Select placeholder="Select a Time Zone" allowClear>
-            {allTimeZones.map(t => (
+            {validTimeZones.map(t => (
               <Select.Option key={t} value={t}>
                 {t} GMT
               </Select.Option>

@@ -20,11 +20,10 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.util.ObjectUtils;
+import org.springframework.util.StringUtils;
 
-import java.util.Collections;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -91,7 +90,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public RegisterUserResponseDto registerUser(RegisterUserRequestDto registerUserRequestDto)
+    public UserDto registerUser(RegisterUserRequestDto registerUserRequestDto)
             throws UserExistsException, OperationForbiddenException {
         if (isUsernameTaken(registerUserRequestDto.getUsername())) {
             throw new UserExistsException("User exists with username: " + registerUserRequestDto.getUsername());
@@ -106,108 +105,82 @@ public class UserServiceImpl implements UserService {
         }
         User user = new User();
         user.setUsername(registerUserRequestDto.getUsername());
-        user.setEnabled(true);
         user.setPassword(passwordEncoder.encode(registerUserRequestDto.getPassword()));
 
-        Optional<Role> optionalRole = roleRepository.findByType(RoleType.user);
-        Role role;
-        if (optionalRole.isEmpty()) {
-            role = new Role();
-            role.setType(RoleType.user);
-            roleRepository.save(role);
-        } else {
-            role = optionalRole.get();
-        }
+        if (ObjectUtils.isEmpty(registerUserRequestDto.getRoles())) {
+            Optional<Role> optionalRole = roleRepository.findByType(RoleType.user);
+            Role role;
+            if (optionalRole.isEmpty()) {
+                role = new Role();
+                role.setType(RoleType.user);
+                roleRepository.save(role);
+            } else {
+                role = optionalRole.get();
+            }
 
-        user.setRoles(Collections.singleton(role));
+            user.setRoles(Collections.singleton(role));
+        } else {
+            Set<Role> roles = new HashSet<>();
+            for (RoleType roleType : registerUserRequestDto.getRoles()) {
+                Optional<Role> optionalRole = roleRepository.findByType(roleType);
+                Role role;
+                if (optionalRole.isEmpty()) {
+                    role = new Role();
+                    role.setType(roleType);
+                    roleRepository.save(role);
+                } else {
+                    role = optionalRole.get();
+                }
+                roles.add(role);
+            }
+            user.setRoles(roles);
+        }
 
         userRepository.saveAndFlush(user);
 
-        RegisterUserResponseDto registerUserResponseDto = new RegisterUserResponseDto();
-        registerUserResponseDto.setUsername(user.getUsername());
-        registerUserResponseDto.setRoles(Collections.singleton(RoleType.user));
-
-        return registerUserResponseDto;
+        UserDto userDto = UserUtil.convertUserToDto(user);
+        String createdBy = currentAuthenticatedUser == null ? "system" : currentAuthenticatedUser.getUsername();
+        userDto.setCreatedBy(createdBy);
+        return userDto;
     }
 
     @Override
-    public RegisterUserResponseDto registerUserManager(RegisterUserRequestDto registerUserRequestDto)
-            throws UserExistsException, OperationForbiddenException {
-        if (isUsernameTaken(registerUserRequestDto.getUsername())) {
-            throw new UserExistsException("User exists with username: " + registerUserRequestDto.getUsername());
-        }
+    public List<UserDto> getAllUsers() throws OperationForbiddenException {
         UserDto currentAuthenticatedUser = getCurrentAuthenticatedUser();
-        if (currentAuthenticatedUser != null) {
-            Set<RoleDto> roles = currentAuthenticatedUser.getRoles();
-            if (!UserUtil.hasUserManagementAuthority(roles)) {
-                throw new OperationForbiddenException("User: " + currentAuthenticatedUser.getUsername() +
-                        " does not have authority to create another user");
-            }
+        if (currentAuthenticatedUser == null) {
+            throw new OperationForbiddenException("User must be authenticated to view all users.");
         }
-        User user = new User();
-        user.setUsername(registerUserRequestDto.getUsername());
-        user.setEnabled(true);
-        user.setPassword(passwordEncoder.encode(registerUserRequestDto.getPassword()));
-
-        Optional<Role> optionalRole = roleRepository.findByType(RoleType.user_manager);
-        Role role;
-        if (optionalRole.isEmpty()) {
-            role = new Role();
-            role.setType(RoleType.user_manager);
-            roleRepository.save(role);
-        } else {
-            role = optionalRole.get();
+        if (UserUtil.hasAdminAuthority(currentAuthenticatedUser.getRoles())) {
+            List<User> users = userRepository.findAllByIsDeleted(false);
+            return UserUtil.convertUsersToDtoList(users);
         }
-
-        user.setRoles(Collections.singleton(role));
-
-        userRepository.saveAndFlush(user);
-
-        RegisterUserResponseDto registerUserResponseDto = new RegisterUserResponseDto();
-        registerUserResponseDto.setUsername(user.getUsername());
-        registerUserResponseDto.setRoles(Collections.singleton(RoleType.user_manager));
-
-        return registerUserResponseDto;
+        if (UserUtil.hasUserManagementAuthority(currentAuthenticatedUser.getRoles())) {
+            List<User> users =
+                    userRepository.findAllByIsDeletedAndCreatedBy(false, currentAuthenticatedUser.getUsername());
+            return UserUtil.convertUsersToDtoList(users);
+        }
+        throw new OperationForbiddenException("User: " + currentAuthenticatedUser.getUsername() +
+                " does not have authority to view all users");
     }
 
     @Override
-    public RegisterUserResponseDto registerAdmin(RegisterUserRequestDto registerUserRequestDto)
-            throws UserExistsException, OperationForbiddenException {
-        if (isUsernameTaken(registerUserRequestDto.getUsername())) {
-            throw new UserExistsException("User exists with username: " + registerUserRequestDto.getUsername());
-        }
+    public UserDto getUser(UUID uid) throws OperationForbiddenException, ResourceNotFoundException {
         UserDto currentAuthenticatedUser = getCurrentAuthenticatedUser();
-        if (currentAuthenticatedUser != null) {
+        if (currentAuthenticatedUser == null) {
+            throw new OperationForbiddenException("Operation cannot be performed unauthenticated");
+        }
+        Optional<User> optionalUser = userRepository.findByUidAndIsDeleted(uid, false);
+        if (optionalUser.isPresent()) {
             Set<RoleDto> roles = currentAuthenticatedUser.getRoles();
-            if (!UserUtil.hasUserManagementAuthority(roles)) {
-                throw new OperationForbiddenException("User: " + currentAuthenticatedUser.getUsername() +
-                        " does not have authority to create another user");
+            User user = optionalUser.get();
+            String username = user.getUsername();
+            String owner = user.getCreatedBy();
+            if (currentAuthenticatedUser.getUsername().equals(owner) ||
+                    currentAuthenticatedUser.getUsername().equals(username) || UserUtil.hasAdminAuthority(roles)) {
+                return UserUtil.convertUserToDto(user);
             }
         }
-        User user = new User();
-        user.setUsername(registerUserRequestDto.getUsername());
-        user.setEnabled(true);
-        user.setPassword(passwordEncoder.encode(registerUserRequestDto.getPassword()));
-
-        Optional<Role> optionalRole = roleRepository.findByType(RoleType.admin);
-        Role role;
-        if (optionalRole.isEmpty()) {
-            role = new Role();
-            role.setType(RoleType.admin);
-            roleRepository.save(role);
-        } else {
-            role = optionalRole.get();
-        }
-
-        user.setRoles(Collections.singleton(role));
-
-        userRepository.saveAndFlush(user);
-
-        RegisterUserResponseDto registerUserResponseDto = new RegisterUserResponseDto();
-        registerUserResponseDto.setUsername(user.getUsername());
-        registerUserResponseDto.setRoles(Collections.singleton(RoleType.admin));
-
-        return registerUserResponseDto;
+        throw new ResourceNotFoundException("User not present with the ID: " + uid);
     }
 
     @Override
@@ -225,7 +198,25 @@ public class UserServiceImpl implements UserService {
             String owner = user.getCreatedBy();
             if (currentAuthenticatedUser.getUsername().equals(owner) ||
                     currentAuthenticatedUser.getUsername().equals(username) || UserUtil.hasAdminAuthority(roles)) {
-                user.setPassword(updateUserRequestDto.getPassword());
+                if (!StringUtils.isEmpty(updateUserRequestDto.getPassword())) {
+                    user.setPassword(passwordEncoder.encode(updateUserRequestDto.getPassword()));
+                }
+                if (!ObjectUtils.isEmpty(updateUserRequestDto.getRoles())) {
+                    Set<Role> userRoles = new HashSet<>();
+                    for (RoleType roleType : updateUserRequestDto.getRoles()) {
+                        Optional<Role> optionalRole = roleRepository.findByType(roleType);
+                        Role role;
+                        if (optionalRole.isEmpty()) {
+                            role = new Role();
+                            role.setType(RoleType.user);
+                            roleRepository.save(role);
+                        } else {
+                            role = optionalRole.get();
+                        }
+                        userRoles.add(role);
+                    }
+                    user.setRoles(userRoles);
+                }
                 return UserUtil.convertUserToDto(userRepository.save(user));
             } else {
                 throw new OperationForbiddenException("User: " + currentAuthenticatedUser.getUsername() +
@@ -250,7 +241,7 @@ public class UserServiceImpl implements UserService {
             String owner = user.getCreatedBy();
             if (currentAuthenticatedUser.getUsername().equals(owner) ||
                     currentAuthenticatedUser.getUsername().equals(username) || UserUtil.hasAdminAuthority(roles)) {
-                user.setEnabled(false);
+                user.setDeleted(true);
                 userRepository.save(user);
             } else {
                 throw new OperationForbiddenException("User: " + currentAuthenticatedUser.getUsername() +

@@ -3,6 +3,7 @@ package com.manager.timezone.timezonemanagerserver.controller;
 import com.manager.timezone.timezonemanagerserver.constants.ServerUri;
 import com.manager.timezone.timezonemanagerserver.dto.ErrorResponseDto;
 import com.manager.timezone.timezonemanagerserver.dto.TimeZoneDto;
+import com.manager.timezone.timezonemanagerserver.exception.InvalidResourceException;
 import com.manager.timezone.timezonemanagerserver.exception.OperationForbiddenException;
 import com.manager.timezone.timezonemanagerserver.exception.ResourceNotFoundException;
 import com.manager.timezone.timezonemanagerserver.service.TimeZoneService;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Api(tags = "Time Zone Operation APIs")
@@ -33,9 +35,14 @@ public class TimeZoneController {
             @ApiResponse(code = 500, message = "Internal Server Error", response = ErrorResponseDto.class)
     })
     @GetMapping
-    public ResponseEntity<?> getAllTimeZones() {
+    public ResponseEntity<?> getAllTimeZones(@RequestParam Optional<String> timeZoneName) {
         try {
-            List<TimeZoneDto> timeZoneDtoList = timeZoneService.getAllAuthorizedTimeZones();
+            List<TimeZoneDto> timeZoneDtoList;
+            if (timeZoneName.isPresent()) {
+                timeZoneDtoList = timeZoneService.getAllAuthorizedTimeZonesByName(timeZoneName.get());
+            } else {
+                timeZoneDtoList = timeZoneService.getAllAuthorizedTimeZones();
+            }
             return new ResponseEntity<>(timeZoneDtoList, HttpStatus.OK);
         } catch (Exception e) {
             ErrorResponseDto errorResponseDto = new ErrorResponseDto(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
@@ -54,6 +61,9 @@ public class TimeZoneController {
         try {
             TimeZoneDto addedTimeZoneDto = timeZoneService.addTimeZone(timeZoneDto);
             return new ResponseEntity<>(addedTimeZoneDto, HttpStatus.CREATED);
+        } catch (InvalidResourceException e) {
+            ErrorResponseDto errorResponseDto = new ErrorResponseDto(HttpStatus.BAD_REQUEST, e.getMessage());
+            return new ResponseEntity<>(errorResponseDto, HttpStatus.BAD_REQUEST);
         } catch (Exception e) {
             ErrorResponseDto errorResponseDto = new ErrorResponseDto(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
             return new ResponseEntity<>(errorResponseDto, HttpStatus.INTERNAL_SERVER_ERROR);

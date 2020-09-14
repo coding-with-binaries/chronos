@@ -143,7 +143,7 @@ const Main: React.FC = () => {
                   className="user-dropdown-menu"
                   onClick={e => e.preventDefault()}
                 >
-                  Hello! {authUser.username} <DownOutlined />
+                  Hello, {authUser.username}! <DownOutlined />
                 </div>
               </Dropdown>
             </Header>

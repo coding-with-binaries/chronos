@@ -10,5 +10,9 @@ export const initialState: StoreState = {
   timeZonesStore: {
     asyncState: AsyncState.NotStarted,
     timeZones: []
+  },
+  usersStore: {
+    asyncState: AsyncState.NotStarted,
+    users: []
   }
 };

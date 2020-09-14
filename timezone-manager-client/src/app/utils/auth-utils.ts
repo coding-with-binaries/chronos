@@ -1,9 +1,11 @@
-import { Role } from '../types/Auth';
+import { RoleType } from '../types/Auth';
 
-export function hasAdminRoles(roles: Role[]) {
-  return roles.includes(Role.admin);
+export function hasAdminRoles(roles: RoleType[]) {
+  return roles.includes(RoleType.admin);
 }
 
-export function hasUserManagerRoles(roles: Role[]) {
-  return roles.includes(Role.admin) || roles.includes(Role.user_manager);
+export function hasUserManagerRoles(roles: RoleType[]) {
+  return (
+    roles.includes(RoleType.admin) || roles.includes(RoleType.user_manager)
+  );
 }

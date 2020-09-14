@@ -5,7 +5,9 @@ import com.manager.timezone.timezonemanagerserver.dto.*;
 import com.manager.timezone.timezonemanagerserver.exception.OperationForbiddenException;
 import com.manager.timezone.timezonemanagerserver.exception.ResourceNotFoundException;
 import com.manager.timezone.timezonemanagerserver.exception.UserExistsException;
+import com.manager.timezone.timezonemanagerserver.model.User;
 
+import java.util.List;
 import java.util.UUID;
 
 public interface UserService {
@@ -17,14 +19,12 @@ public interface UserService {
 
     AuthenticateUserResponseDto authenticateUser(AuthenticateUserRequestDto authenticateUserRequestDto);
 
-    RegisterUserResponseDto registerUser(RegisterUserRequestDto registerUserRequestDto)
+    UserDto registerUser(RegisterUserRequestDto registerUserRequestDto)
             throws UserExistsException, OperationForbiddenException;
 
-    RegisterUserResponseDto registerUserManager(RegisterUserRequestDto registerUserRequestDto)
-            throws UserExistsException, OperationForbiddenException;
+    List<UserDto> getAllUsers() throws OperationForbiddenException;
 
-    RegisterUserResponseDto registerAdmin(RegisterUserRequestDto registerUserRequestDto)
-            throws UserExistsException, OperationForbiddenException;
+    UserDto getUser(UUID uid) throws OperationForbiddenException, ResourceNotFoundException;
 
     UserDto updateUser(UUID uid, UpdateUserRequestDto updateUserRequestDto)
             throws OperationForbiddenException, ResourceNotFoundException;

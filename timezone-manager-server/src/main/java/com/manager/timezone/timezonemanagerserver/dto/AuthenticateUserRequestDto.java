@@ -1,8 +1,12 @@
 package com.manager.timezone.timezonemanagerserver.dto;
 
+import javax.validation.constraints.NotBlank;
+
 public class AuthenticateUserRequestDto {
+    @NotBlank(message = "Username cannot be blank")
     private String username;
 
+    @NotBlank(message = "Password cannot be blank")
     private String password;
 
     public String getUsername() {

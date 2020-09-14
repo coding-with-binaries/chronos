@@ -12,10 +12,4 @@ public interface ServerUri {
     String WHO_AM_I_URI = AUTH_URI + "/who-am-i";
     String SIGN_IN_URI = AUTH_URI + "/sign-in";
     String SIGN_UP_URI = AUTH_URI + "/sign-up";
-
-    String USER_MANAGER_URI = "/managers";
-    String USER_MANAGER_SIGN_UP_URI = USER_MANAGER_URI + AUTH_URI + "/sign-up";
-
-    String ADMIN_URI = "/admins";
-    String ADMIN_SIGN_UP_URI = ADMIN_URI + AUTH_URI + "/sign-up";
 }

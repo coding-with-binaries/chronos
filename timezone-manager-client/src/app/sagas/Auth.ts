@@ -13,6 +13,7 @@ import { AuthenticateUser, SignOutUser } from '../actions/auth/ActionTypes';
 import UserApi from '../api/user/User';
 import { AuthResponseDto, AuthUser } from '../types/Auth';
 import { ErrorResponse } from '../types/Common';
+import { RegisterUserDto } from '../types/Users';
 import {
   clearAuthorizationToken,
   setAuthorizationToken
@@ -56,7 +57,11 @@ function* watchForUserAuthentication() {
 
 function* registerUserSaga(action: AuthenticateUser) {
   try {
-    yield call(UserApi.registerUser, action.payload.authRequestDto);
+    const registerUserDto: RegisterUserDto = {
+      ...action.payload.authRequestDto,
+      roles: []
+    };
+    yield call(UserApi.registerUser, registerUserDto);
     yield put(registerUserSuccess());
     yield put(push('/sign-in?registered=true'));
   } catch (e) {

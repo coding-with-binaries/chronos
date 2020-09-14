@@ -15,6 +15,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
+import java.util.List;
 import java.util.UUID;
 
 @Api(tags = "User Operation APIs")
@@ -24,6 +26,50 @@ public class UserController {
 
     @Autowired
     private UserService userService;
+
+    @ApiOperation(value = "Get all users")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK", response = UserDto.class, responseContainer = "List"),
+            @ApiResponse(code = 401, message = "Unauthorized", response = ErrorResponseDto.class),
+            @ApiResponse(code = 500, message = "Internal Server Error", response = ErrorResponseDto.class)
+    })
+    @GetMapping
+    public ResponseEntity<?> getAllUsers() {
+        try {
+            List<UserDto> users = userService.getAllUsers();
+            return new ResponseEntity<>(users, HttpStatus.OK);
+        } catch (OperationForbiddenException e) {
+            ErrorResponseDto errorResponseDto = new ErrorResponseDto(HttpStatus.UNAUTHORIZED, e.getMessage());
+            return new ResponseEntity<>(errorResponseDto, HttpStatus.UNAUTHORIZED);
+        } catch (Exception e) {
+            ErrorResponseDto errorResponseDto = new ErrorResponseDto(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
+            return new ResponseEntity<>(errorResponseDto, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @ApiOperation(value = "Get user")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK", response = UserDto.class),
+            @ApiResponse(code = 401, message = "Unauthorized", response = ErrorResponseDto.class),
+            @ApiResponse(code = 404, message = "Not Found", response = ErrorResponseDto.class),
+            @ApiResponse(code = 500, message = "Internal Server Error", response = ErrorResponseDto.class)
+    })
+    @GetMapping(ServerUri.RESOURCE_UID_URI)
+    public ResponseEntity<?> getUser(@PathVariable String uid) {
+        try {
+            UserDto updatedUser = userService.getUser(UUID.fromString(uid));
+            return new ResponseEntity<>(updatedUser, HttpStatus.OK);
+        } catch (OperationForbiddenException e) {
+            ErrorResponseDto errorResponseDto = new ErrorResponseDto(HttpStatus.UNAUTHORIZED, e.getMessage());
+            return new ResponseEntity<>(errorResponseDto, HttpStatus.UNAUTHORIZED);
+        } catch (ResourceNotFoundException e) {
+            ErrorResponseDto errorResponseDto = new ErrorResponseDto(HttpStatus.NOT_FOUND, e.getMessage());
+            return new ResponseEntity<>(errorResponseDto, HttpStatus.NOT_FOUND);
+        } catch (Exception e) {
+            ErrorResponseDto errorResponseDto = new ErrorResponseDto(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
+            return new ResponseEntity<>(errorResponseDto, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
 
     @ApiOperation(value = "Who Am I?")
     @ApiResponses(value = {
@@ -53,8 +99,9 @@ public class UserController {
             @ApiResponse(code = 500, message = "Internal Server Error", response = ErrorResponseDto.class)
     })
     @PostMapping(value = ServerUri.SIGN_IN_URI)
-    public ResponseEntity<?> authenticateUser(@RequestBody AuthenticateUserRequestDto requestDto) {
+    public ResponseEntity<?> authenticateUser(@Valid @RequestBody AuthenticateUserRequestDto requestDto) {
         try {
+            requestDto.setUsername(requestDto.getUsername().toLowerCase());
             AuthenticateUserResponseDto responseDto = userService.authenticateUser(requestDto);
             return new ResponseEntity<>(responseDto, HttpStatus.OK);
         } catch (Exception e) {
@@ -65,63 +112,16 @@ public class UserController {
 
     @ApiOperation(value = "Register user")
     @ApiResponses(value = {
-            @ApiResponse(code = 201, message = "Created", response = AuthenticateUserResponseDto.class),
+            @ApiResponse(code = 201, message = "Created", response = UserDto.class),
             @ApiResponse(code = 401, message = "Unauthorized", response = ErrorResponseDto.class),
             @ApiResponse(code = 409, message = "Conflict", response = ErrorResponseDto.class),
             @ApiResponse(code = 500, message = "Internal Server Error", response = ErrorResponseDto.class)
     })
     @PostMapping(value = ServerUri.SIGN_UP_URI)
-    public ResponseEntity<?> registerUser(@RequestBody RegisterUserRequestDto requestDto) {
+    public ResponseEntity<?> registerUser(@Valid @RequestBody RegisterUserRequestDto requestDto) {
         try {
-            RegisterUserResponseDto responseDto = userService.registerUser(requestDto);
-            return new ResponseEntity<>(responseDto, HttpStatus.CREATED);
-        } catch (UserExistsException e) {
-            ErrorResponseDto errorResponseDto = new ErrorResponseDto(HttpStatus.CONFLICT, e.getMessage());
-            return new ResponseEntity<>(errorResponseDto, HttpStatus.CONFLICT);
-        } catch (OperationForbiddenException e) {
-            ErrorResponseDto errorResponseDto = new ErrorResponseDto(HttpStatus.UNAUTHORIZED, e.getMessage());
-            return new ResponseEntity<>(errorResponseDto, HttpStatus.UNAUTHORIZED);
-        } catch (Exception e) {
-            ErrorResponseDto errorResponseDto = new ErrorResponseDto(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
-            return new ResponseEntity<>(errorResponseDto, HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-    }
-
-    @ApiOperation(value = "Register user manager")
-    @ApiResponses(value = {
-            @ApiResponse(code = 201, message = "Created", response = AuthenticateUserResponseDto.class),
-            @ApiResponse(code = 401, message = "Unauthorized", response = ErrorResponseDto.class),
-            @ApiResponse(code = 409, message = "Conflict", response = ErrorResponseDto.class),
-            @ApiResponse(code = 500, message = "Internal Server Error", response = ErrorResponseDto.class)
-    })
-    @PostMapping(value = ServerUri.USER_MANAGER_SIGN_UP_URI)
-    public ResponseEntity<?> registerUserManager(@RequestBody RegisterUserRequestDto requestDto) {
-        try {
-            RegisterUserResponseDto responseDto = userService.registerUserManager(requestDto);
-            return new ResponseEntity<>(responseDto, HttpStatus.CREATED);
-        } catch (UserExistsException e) {
-            ErrorResponseDto errorResponseDto = new ErrorResponseDto(HttpStatus.CONFLICT, e.getMessage());
-            return new ResponseEntity<>(errorResponseDto, HttpStatus.CONFLICT);
-        } catch (OperationForbiddenException e) {
-            ErrorResponseDto errorResponseDto = new ErrorResponseDto(HttpStatus.UNAUTHORIZED, e.getMessage());
-            return new ResponseEntity<>(errorResponseDto, HttpStatus.UNAUTHORIZED);
-        } catch (Exception e) {
-            ErrorResponseDto errorResponseDto = new ErrorResponseDto(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
-            return new ResponseEntity<>(errorResponseDto, HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-    }
-
-    @ApiOperation(value = "Register admin")
-    @ApiResponses(value = {
-            @ApiResponse(code = 201, message = "Created", response = AuthenticateUserResponseDto.class),
-            @ApiResponse(code = 401, message = "Unauthorized", response = ErrorResponseDto.class),
-            @ApiResponse(code = 409, message = "Conflict", response = ErrorResponseDto.class),
-            @ApiResponse(code = 500, message = "Internal Server Error", response = ErrorResponseDto.class)
-    })
-    @PostMapping(value = ServerUri.ADMIN_SIGN_UP_URI)
-    public ResponseEntity<?> registerAdmin(@RequestBody RegisterUserRequestDto requestDto) {
-        try {
-            RegisterUserResponseDto responseDto = userService.registerAdmin(requestDto);
+            requestDto.setUsername(requestDto.getUsername().toLowerCase());
+            UserDto responseDto = userService.registerUser(requestDto);
             return new ResponseEntity<>(responseDto, HttpStatus.CREATED);
         } catch (UserExistsException e) {
             ErrorResponseDto errorResponseDto = new ErrorResponseDto(HttpStatus.CONFLICT, e.getMessage());

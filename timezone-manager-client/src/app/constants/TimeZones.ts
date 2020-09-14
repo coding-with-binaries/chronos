@@ -1,4 +1,4 @@
-export const allTimeZones = [
+export const validTimeZones = [
   '-12:00',
   '-11:00',
   '-10:00',
