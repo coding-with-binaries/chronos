@@ -22,7 +22,4 @@ public class TimeZoneUtil {
         return timeZones.stream().map(TimeZoneUtil::convertTimeZoneToDto).collect(Collectors.toList());
     }
 
-    public static List<TimeZone> convertDtoListToTimeZones(List<TimeZoneDto> timeZoneDtoList) {
-        return timeZoneDtoList.stream().map(TimeZoneUtil::convertDtoToTimeZone).collect(Collectors.toList());
-    }
 }

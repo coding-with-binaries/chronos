@@ -18,7 +18,8 @@ public interface TimeZoneService {
 
     TimeZoneDto addTimeZone(TimeZoneDto timeZoneDto) throws InvalidResourceException;
 
-    TimeZoneDto updateTimeZone(TimeZoneDto timeZoneDto) throws OperationForbiddenException, ResourceNotFoundException;
+    TimeZoneDto updateTimeZone(TimeZoneDto timeZoneDto)
+            throws OperationForbiddenException, ResourceNotFoundException, InvalidResourceException;
 
     void deleteTimeZone(UUID uid) throws OperationForbiddenException, ResourceNotFoundException;
 }

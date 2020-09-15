@@ -84,6 +84,9 @@ public class TimeZoneController {
             timeZoneDto.setUid(UUID.fromString(uid));
             TimeZoneDto updatedTimeZoneDto = timeZoneService.updateTimeZone(timeZoneDto);
             return new ResponseEntity<>(updatedTimeZoneDto, HttpStatus.OK);
+        } catch (InvalidResourceException e) {
+            ErrorResponseDto errorResponseDto = new ErrorResponseDto(HttpStatus.BAD_REQUEST, e.getMessage());
+            return new ResponseEntity<>(errorResponseDto, HttpStatus.BAD_REQUEST);
         } catch (OperationForbiddenException e) {
             ErrorResponseDto errorResponseDto = new ErrorResponseDto(HttpStatus.UNAUTHORIZED, e.getMessage());
             return new ResponseEntity<>(errorResponseDto, HttpStatus.UNAUTHORIZED);

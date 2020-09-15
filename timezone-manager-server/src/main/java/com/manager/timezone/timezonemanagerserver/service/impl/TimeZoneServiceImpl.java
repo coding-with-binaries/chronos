@@ -70,7 +70,7 @@ public class TimeZoneServiceImpl implements TimeZoneService {
 
     @Override
     public TimeZoneDto updateTimeZone(TimeZoneDto timeZoneDto)
-            throws OperationForbiddenException, ResourceNotFoundException {
+            throws OperationForbiddenException, ResourceNotFoundException, InvalidResourceException {
         UserDto currentAuthenticatedUser = userService.getCurrentAuthenticatedUser();
         if (currentAuthenticatedUser == null) {
             throw new OperationForbiddenException("Operation cannot be performed unauthenticated");
@@ -81,6 +81,10 @@ public class TimeZoneServiceImpl implements TimeZoneService {
             TimeZone timeZone = optionalTimeZone.get();
             String owner = timeZone.getCreatedBy();
             if (currentAuthenticatedUser.getUsername().equals(owner) || UserUtil.hasAdminAuthority(roles)) {
+                if (!TimeZoneConstants.VALID_TIME_ZONE_OFFSETS.contains(timeZoneDto.getDifferenceFromGmt())) {
+                    throw new InvalidResourceException(
+                            "The time zone offset is not valid: " + timeZoneDto.getDifferenceFromGmt());
+                }
                 timeZone.setDifferenceFromGmt(timeZoneDto.getDifferenceFromGmt());
                 timeZone.setLocationName(timeZoneDto.getLocationName());
                 timeZone.setTimeZoneName(timeZoneDto.getTimeZoneName());
