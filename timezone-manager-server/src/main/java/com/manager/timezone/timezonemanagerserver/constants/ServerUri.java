@@ -12,4 +12,5 @@ public interface ServerUri {
     String WHO_AM_I_URI = AUTH_URI + "/who-am-i";
     String SIGN_IN_URI = AUTH_URI + "/sign-in";
     String SIGN_UP_URI = AUTH_URI + "/sign-up";
+    String PASSWORD_URI = RESOURCE_UID_URI + "/password";
 }

@@ -14,7 +14,5 @@ public interface UserRepository extends JpaRepository<User, UUID> {
 
     List<User> findAllByIsDeleted(boolean isDeleted);
 
-    List<User> findAllByIsDeletedAndCreatedBy(boolean isDeleted, String createdBy);
-
     Optional<User> findByUidAndIsDeleted(UUID uid, boolean isDeleted);
 }

@@ -25,11 +25,6 @@ interface UpdateModalData {
   initialValues?: RegisterUserDto;
 }
 
-interface SearchState {
-  searchText?: React.ReactText;
-  searchedColumn?: string;
-}
-
 const Users: React.FC = () => {
   const { authUser } = useSelector<StoreState, AuthStore>(s => s.authStore);
   const { error, users } = useSelector<StoreState, UsersStore>(
@@ -50,6 +45,18 @@ const Users: React.FC = () => {
   const onConfirmDelete = (uid: string) => () => {
     dispatch(deleteUser(uid));
   };
+
+  const dataSource = users
+    .filter(u => u.username !== authUser?.username)
+    .map(u => {
+      return {
+        key: u.uid,
+        username: u.username,
+        roles: u.roles,
+        createdBy: getUserCreatedBy(u.username, u.createdBy),
+        actions: u.uid
+      };
+    });
 
   type DataIndex = keyof typeof dataSource[0];
 
@@ -185,18 +192,6 @@ const Users: React.FC = () => {
     });
     return columns;
   };
-
-  const dataSource = users
-    .filter(u => u.username !== authUser?.username)
-    .map(u => {
-      return {
-        key: u.uid,
-        username: u.username,
-        roles: u.roles,
-        createdBy: getUserCreatedBy(u.username, u.createdBy),
-        actions: u.uid
-      };
-    });
 
   const showAddUserModal = () => {
     setUpdateModalData({

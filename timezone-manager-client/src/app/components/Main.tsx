@@ -1,6 +1,8 @@
 import {
   ClockCircleOutlined,
   DownOutlined,
+  LogoutOutlined,
+  SettingOutlined,
   UserOutlined
 } from '@ant-design/icons';
 import { Dropdown, Layout, Menu, Spin } from 'antd';
@@ -22,6 +24,7 @@ import { AuthStore } from '../types/Auth';
 import { AsyncState } from '../types/Common';
 import { hasUserManagerRoles } from '../utils/auth-utils';
 import './Main.css';
+import Settings from './settings/Settings';
 import TimeZones from './time-zones/TimeZones';
 import Users from './users/Users';
 
@@ -73,12 +76,19 @@ const Main: React.FC = () => {
     const { key } = info;
     if (key === 'sign-out') {
       onSignOutClick();
+    } else if (key === 'settings') {
+      history.push('/settings');
     }
   };
 
   const dropdownMenu = (
     <Menu onClick={handleDropdownMenuItemClick}>
-      <Menu.Item key="sign-out">Sign Out</Menu.Item>
+      <Menu.Item key="settings" icon={<SettingOutlined />}>
+        User Settings
+      </Menu.Item>
+      <Menu.Item key="sign-out" icon={<LogoutOutlined />}>
+        Sign Out
+      </Menu.Item>
     </Menu>
   );
 
@@ -103,7 +113,7 @@ const Main: React.FC = () => {
 
     if (asyncState === AsyncState.Completed && authUser) {
       const { roles } = authUser;
-      const availableRoutes = [
+      let availableRoutes = [
         <Route key="time-zones" path="/time-zones">
           <TimeZones />
         </Route>
@@ -115,9 +125,13 @@ const Main: React.FC = () => {
           </Route>
         );
       }
-      availableRoutes.push(
+
+      availableRoutes = availableRoutes.concat([
+        <Route key="settings" path="/settings">
+          <Settings />
+        </Route>,
         <Redirect key="redirect" exact={true} path="/" to="time-zones" />
-      );
+      ]);
       return (
         <Layout id="timezone-manager-layout">
           <Sider collapsible>

@@ -36,12 +36,12 @@ function* watchForGetCurrentUser() {
 
 function* authenticateUserSaga(action: AuthenticateUser) {
   try {
-    const { accessToken, username, roles }: AuthResponseDto = yield call(
+    const { accessToken, uid, username, roles }: AuthResponseDto = yield call(
       UserApi.authenticateUser,
       action.payload.authRequestDto
     );
     setAuthorizationToken(accessToken);
-    const authUser: AuthUser = { username, roles };
+    const authUser: AuthUser = { uid, username, roles };
     yield put(authenticateUserSuccess(accessToken, authUser));
     yield put(push('/'));
   } catch (e) {

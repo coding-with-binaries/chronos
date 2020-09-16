@@ -1,13 +1,18 @@
 package com.manager.timezone.timezonemanagerserver.dto;
 
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
 import java.util.Set;
 
 public class RegisterUserRequestDto {
     @NotBlank(message = "Username cannot be blank.")
+    @Min(value = 6, message = "Username must have minimum 6 characters")
+    @Max(value = 30, message = "Username must have maximum 30 characters")
     private String username;
 
     @NotBlank(message = "Password cannot be blank.")
+    @Min(value = 6, message = "Password must have minimum 6 characters")
     private String password;
 
     private Set<RoleType> roles;

@@ -48,6 +48,18 @@ const TimeZones: React.FC = () => {
     dispatch(deleteTimeZone(uid));
   };
 
+  const dataSource = timeZones.map(t => {
+    return {
+      key: t.uid,
+      timeZoneName: t.timeZoneName,
+      locationName: t.locationName,
+      differenceFromGmt: t.differenceFromGmt,
+      currentTime: t.differenceFromGmt,
+      createdBy: t.createdBy,
+      actions: t.uid
+    };
+  });
+
   type DataIndex = keyof typeof dataSource[0];
 
   const nodeRef = createRef<Input>();
@@ -172,18 +184,6 @@ const TimeZones: React.FC = () => {
     });
     return columns;
   };
-
-  const dataSource = timeZones.map(t => {
-    return {
-      key: t.uid,
-      timeZoneName: t.timeZoneName,
-      locationName: t.locationName,
-      differenceFromGmt: t.differenceFromGmt,
-      currentTime: t.differenceFromGmt,
-      createdBy: t.createdBy,
-      actions: t.uid
-    };
-  });
 
   const showAddTimeZoneModal = () => {
     setUpdateModalData({

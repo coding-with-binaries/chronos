@@ -2,6 +2,7 @@ package com.manager.timezone.timezonemanagerserver.controller;
 
 import com.manager.timezone.timezonemanagerserver.constants.ServerUri;
 import com.manager.timezone.timezonemanagerserver.dto.*;
+import com.manager.timezone.timezonemanagerserver.exception.InvalidResourceException;
 import com.manager.timezone.timezonemanagerserver.exception.OperationForbiddenException;
 import com.manager.timezone.timezonemanagerserver.exception.ResourceNotFoundException;
 import com.manager.timezone.timezonemanagerserver.exception.UserExistsException;
@@ -113,6 +114,7 @@ public class UserController {
     @ApiOperation(value = "Register user")
     @ApiResponses(value = {
             @ApiResponse(code = 201, message = "Created", response = UserDto.class),
+            @ApiResponse(code = 400, message = "Bad Request", response = ErrorResponseDto.class),
             @ApiResponse(code = 401, message = "Unauthorized", response = ErrorResponseDto.class),
             @ApiResponse(code = 409, message = "Conflict", response = ErrorResponseDto.class),
             @ApiResponse(code = 500, message = "Internal Server Error", response = ErrorResponseDto.class)
@@ -129,6 +131,9 @@ public class UserController {
         } catch (OperationForbiddenException e) {
             ErrorResponseDto errorResponseDto = new ErrorResponseDto(HttpStatus.UNAUTHORIZED, e.getMessage());
             return new ResponseEntity<>(errorResponseDto, HttpStatus.UNAUTHORIZED);
+        } catch (InvalidResourceException e) {
+            ErrorResponseDto errorResponseDto = new ErrorResponseDto(HttpStatus.BAD_REQUEST, e.getMessage());
+            return new ResponseEntity<>(errorResponseDto, HttpStatus.BAD_REQUEST);
         } catch (Exception e) {
             ErrorResponseDto errorResponseDto = new ErrorResponseDto(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
             return new ResponseEntity<>(errorResponseDto, HttpStatus.INTERNAL_SERVER_ERROR);
@@ -138,6 +143,7 @@ public class UserController {
     @ApiOperation(value = "Update user")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK", response = UserDto.class),
+            @ApiResponse(code = 400, message = "Bad Request", response = ErrorResponseDto.class),
             @ApiResponse(code = 401, message = "Unauthorized", response = ErrorResponseDto.class),
             @ApiResponse(code = 404, message = "Not Found", response = ErrorResponseDto.class),
             @ApiResponse(code = 500, message = "Internal Server Error", response = ErrorResponseDto.class)
@@ -148,6 +154,35 @@ public class UserController {
         try {
             UserDto updatedUser = userService.updateUser(UUID.fromString(uid), updateUserRequestDto);
             return new ResponseEntity<>(updatedUser, HttpStatus.OK);
+        } catch (OperationForbiddenException e) {
+            ErrorResponseDto errorResponseDto = new ErrorResponseDto(HttpStatus.UNAUTHORIZED, e.getMessage());
+            return new ResponseEntity<>(errorResponseDto, HttpStatus.UNAUTHORIZED);
+        } catch (ResourceNotFoundException e) {
+            ErrorResponseDto errorResponseDto = new ErrorResponseDto(HttpStatus.NOT_FOUND, e.getMessage());
+            return new ResponseEntity<>(errorResponseDto, HttpStatus.NOT_FOUND);
+        } catch (InvalidResourceException e) {
+            ErrorResponseDto errorResponseDto = new ErrorResponseDto(HttpStatus.BAD_REQUEST, e.getMessage());
+            return new ResponseEntity<>(errorResponseDto, HttpStatus.BAD_REQUEST);
+        } catch (Exception e) {
+            ErrorResponseDto errorResponseDto = new ErrorResponseDto(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
+            return new ResponseEntity<>(errorResponseDto, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @ApiOperation(value = "Update user password")
+    @ApiResponses(value = {
+            @ApiResponse(code = 204, message = "No Content", response = UserDto.class),
+            @ApiResponse(code = 400, message = "Bad Request", response = ErrorResponseDto.class),
+            @ApiResponse(code = 401, message = "Unauthorized", response = ErrorResponseDto.class),
+            @ApiResponse(code = 404, message = "Not Found", response = ErrorResponseDto.class),
+            @ApiResponse(code = 500, message = "Internal Server Error", response = ErrorResponseDto.class)
+    })
+    @PutMapping(ServerUri.PASSWORD_URI)
+    public ResponseEntity<?> updateUserPassword(@PathVariable String uid,
+            @RequestBody UpdatePasswordDto updatePasswordDto) {
+        try {
+            userService.updateUserPassword(UUID.fromString(uid), updatePasswordDto);
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         } catch (OperationForbiddenException e) {
             ErrorResponseDto errorResponseDto = new ErrorResponseDto(HttpStatus.UNAUTHORIZED, e.getMessage());
             return new ResponseEntity<>(errorResponseDto, HttpStatus.UNAUTHORIZED);

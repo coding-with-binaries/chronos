@@ -1,10 +1,16 @@
-import { AuthRequestDto, AuthResponseDto, AuthUser } from '../../types/Auth';
+import {
+  AuthRequestDto,
+  AuthResponseDto,
+  AuthUser,
+  UpdatePasswordDto
+} from '../../types/Auth';
 import { RegisterUserDto, UpdateUserDto, User } from '../../types/Users';
 import { clearAuthorizationToken } from '../../utils/api-utils';
 import Http from '../Http';
 import {
   SIGN_IN_URI,
   SIGN_UP_URI,
+  UPDATE_PASSWORD_URI,
   USERS_URI,
   USER_URI,
   WHO_AM_I_URI
@@ -37,6 +43,13 @@ export default class UserApi {
   public static async updateUser(uid: string, updateUserDto: UpdateUserDto) {
     const response = await Http.put<User>(USER_URI(uid), updateUserDto);
     return response.data;
+  }
+
+  public static async updateUserPassword(
+    uid: string,
+    updatePasswordDto: UpdatePasswordDto
+  ) {
+    await Http.put(UPDATE_PASSWORD_URI(uid), updatePasswordDto);
   }
 
   public static async deleteUser(uid: string) {

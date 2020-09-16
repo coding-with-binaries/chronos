@@ -57,8 +57,8 @@ const SignIn: React.FC = () => {
                 message: 'Username must contain minimum 6 characters!'
               },
               {
-                max: 20,
-                message: 'Username must contain maximum 20 characters!'
+                max: 30,
+                message: 'Username must contain maximum 30 characters!'
               },
               {
                 pattern: USERNAME_REGEX,

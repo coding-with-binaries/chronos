@@ -1,15 +1,23 @@
 package com.manager.timezone.timezonemanagerserver.dto;
 
 import java.util.Set;
+import java.util.UUID;
 
 public class AuthenticateUserResponseDto {
     private String accessToken;
+
+    private UUID uid;
 
     private String username;
 
     private Set<RoleType> roles;
 
-    public AuthenticateUserResponseDto(String accessToken, String username, Set<RoleType> roles) {
+    public AuthenticateUserResponseDto() {
+
+    }
+
+    public AuthenticateUserResponseDto(String accessToken, UUID uid, String username, Set<RoleType> roles) {
+        this.uid = uid;
         this.accessToken = accessToken;
         this.username = username;
         this.roles = roles;
@@ -21,6 +29,14 @@ public class AuthenticateUserResponseDto {
 
     public void setAccessToken(String accessToken) {
         this.accessToken = accessToken;
+    }
+
+    public UUID getUid() {
+        return uid;
+    }
+
+    public void setUid(UUID uid) {
+        this.uid = uid;
     }
 
     public String getUsername() {

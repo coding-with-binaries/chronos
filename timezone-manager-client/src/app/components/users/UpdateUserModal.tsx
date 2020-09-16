@@ -1,12 +1,15 @@
 import { Form, Input, Modal, Select } from 'antd';
 import React, { useCallback, useEffect, useState } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { Dispatch } from 'redux';
 import { addUser, editUser } from '../../actions/users/Actions';
 import { UserAction } from '../../actions/users/ActionTypes';
 import UserApi from '../../api/user/User';
 import { ROLE_MAPPING } from '../../constants/Roles';
+import { StoreState } from '../../types';
+import { AuthStore, RoleType } from '../../types/Auth';
 import { RegisterUserDto, UpdateUserDto, User } from '../../types/Users';
+import { hasAdminRoles } from '../../utils/auth-utils';
 
 interface Props {
   visible: boolean;
@@ -18,6 +21,7 @@ interface Props {
 
 const UpdateUserModal: React.FC<Props> = props => {
   const { visible, uid, mode, initialValues, onDismiss } = props;
+  const { authUser } = useSelector<StoreState, AuthStore>(s => s.authStore);
   const dispatch = useDispatch<Dispatch<UserAction>>();
 
   const [form] = Form.useForm();
@@ -48,7 +52,7 @@ const UpdateUserModal: React.FC<Props> = props => {
         const registerUserDto: RegisterUserDto = {
           username: formValues.username,
           password: formValues.password,
-          roles: formValues.roles
+          roles: [formValues.role]
         };
         dispatch(addUser(registerUserDto));
         form.resetFields();
@@ -56,7 +60,7 @@ const UpdateUserModal: React.FC<Props> = props => {
       } else if (mode === 'EDIT' && !!uid) {
         const updateUserDto: UpdateUserDto = {
           password: formValues.password,
-          roles: formValues.roles
+          roles: [formValues.role]
         };
         dispatch(editUser(uid, updateUserDto));
         onDismiss();
@@ -66,6 +70,10 @@ const UpdateUserModal: React.FC<Props> = props => {
     }
   };
 
+  const isAdmin = !!authUser && hasAdminRoles(authUser.roles);
+  const allowedRoles = Object.entries(ROLE_MAPPING).filter(
+    ([roleType]) => isAdmin || roleType !== RoleType.admin
+  );
   return (
     <Modal
       visible={visible}
@@ -77,7 +85,11 @@ const UpdateUserModal: React.FC<Props> = props => {
       onOk={onSubmit}
       width={800}
     >
-      <Form form={form} layout="vertical" initialValues={initialValues}>
+      <Form
+        form={form}
+        layout="vertical"
+        initialValues={{ ...initialValues, role: initialValues.roles[0] }}
+      >
         <Form.Item
           name="username"
           label="Username"
@@ -85,32 +97,34 @@ const UpdateUserModal: React.FC<Props> = props => {
         >
           <Input disabled={mode === 'EDIT'} placeholder="Enter Username here" />
         </Form.Item>
+        {mode === 'ADD' && (
+          <Form.Item
+            label="Password"
+            name="password"
+            hasFeedback
+            rules={[
+              { required: true, message: 'Please input the password!' },
+              {
+                min: 6,
+                message: 'Password should contain minimum 6 characters!'
+              }
+            ]}
+          >
+            <Input.Password type="password" placeholder="Password" />
+          </Form.Item>
+        )}
         <Form.Item
-          label="Password"
-          name="password"
-          hasFeedback
-          rules={[
-            { required: mode === 'ADD', message: 'Please input the username!' },
-            {
-              min: 6,
-              message: 'Password should contain minimum 6 characters!'
-            }
-          ]}
-        >
-          <Input.Password type="password" placeholder="Password" />
-        </Form.Item>
-        <Form.Item
-          name="roles"
-          label="Roles"
+          name="role"
+          label="Role"
           rules={[
             {
               required: true,
-              message: 'Please select roles!'
+              message: 'Please select role!'
             }
           ]}
         >
-          <Select mode="multiple" placeholder="Select Roles" allowClear>
-            {Object.entries(ROLE_MAPPING).map(([roleType, roleDisplay]) => (
+          <Select placeholder="Select Role" allowClear>
+            {allowedRoles.map(([roleType, roleDisplay]) => (
               <Select.Option key={roleType} value={roleType}>
                 {roleDisplay}
               </Select.Option>

@@ -2,6 +2,7 @@ package com.manager.timezone.timezonemanagerserver.service;
 
 import com.manager.timezone.timezonemanagerserver.auth.AuthUserDetails;
 import com.manager.timezone.timezonemanagerserver.dto.*;
+import com.manager.timezone.timezonemanagerserver.exception.InvalidResourceException;
 import com.manager.timezone.timezonemanagerserver.exception.OperationForbiddenException;
 import com.manager.timezone.timezonemanagerserver.exception.ResourceNotFoundException;
 import com.manager.timezone.timezonemanagerserver.exception.UserExistsException;
@@ -20,13 +21,16 @@ public interface UserService {
     AuthenticateUserResponseDto authenticateUser(AuthenticateUserRequestDto authenticateUserRequestDto);
 
     UserDto registerUser(RegisterUserRequestDto registerUserRequestDto)
-            throws UserExistsException, OperationForbiddenException;
+            throws UserExistsException, OperationForbiddenException, InvalidResourceException;
 
     List<UserDto> getAllUsers() throws OperationForbiddenException;
 
     UserDto getUser(UUID uid) throws OperationForbiddenException, ResourceNotFoundException;
 
     UserDto updateUser(UUID uid, UpdateUserRequestDto updateUserRequestDto)
+            throws OperationForbiddenException, ResourceNotFoundException, InvalidResourceException;
+
+    void updateUserPassword(UUID uid, UpdatePasswordDto updatePasswordDto)
             throws OperationForbiddenException, ResourceNotFoundException;
 
     void deleteUser(UUID uid) throws OperationForbiddenException, ResourceNotFoundException;

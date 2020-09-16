@@ -13,13 +13,20 @@ export enum RoleType {
 
 export interface AuthResponseDto {
   accessToken: string;
+  uid: string;
   username: string;
   roles: RoleType[];
 }
 
 export interface AuthUser {
+  uid: string;
   username: string;
   roles: RoleType[];
+}
+
+export interface UpdatePasswordDto {
+  currentPassword: string;
+  newPassword: string;
 }
 
 export interface AuthStore {

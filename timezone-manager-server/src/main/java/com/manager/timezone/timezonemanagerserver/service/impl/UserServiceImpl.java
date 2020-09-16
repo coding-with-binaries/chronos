@@ -3,6 +3,7 @@ package com.manager.timezone.timezonemanagerserver.service.impl;
 import com.manager.timezone.timezonemanagerserver.auth.AuthUserDetails;
 import com.manager.timezone.timezonemanagerserver.auth.JwtTokenProvider;
 import com.manager.timezone.timezonemanagerserver.dto.*;
+import com.manager.timezone.timezonemanagerserver.exception.InvalidResourceException;
 import com.manager.timezone.timezonemanagerserver.exception.OperationForbiddenException;
 import com.manager.timezone.timezonemanagerserver.exception.ResourceNotFoundException;
 import com.manager.timezone.timezonemanagerserver.exception.UserExistsException;
@@ -66,6 +67,7 @@ public class UserServiceImpl implements UserService {
             return null;
         }
         WhoAmIDto whoAmI = new WhoAmIDto();
+        whoAmI.setUid(currentAuthenticatedUser.getUid());
         whoAmI.setUsername(currentAuthenticatedUser.getUsername());
         Set<RoleType> roles =
                 currentAuthenticatedUser.getRoles().stream().map(RoleDto::getType).collect(Collectors.toSet());
@@ -85,13 +87,14 @@ public class UserServiceImpl implements UserService {
         UserDto currentAuthenticatedUser = getCurrentAuthenticatedUser();
         Set<RoleType> roles =
                 currentAuthenticatedUser.getRoles().stream().map(RoleDto::getType).collect(Collectors.toSet());
-        return new AuthenticateUserResponseDto(jwt, currentAuthenticatedUser.getUsername(), roles);
+        return new AuthenticateUserResponseDto(jwt, currentAuthenticatedUser.getUid(),
+                currentAuthenticatedUser.getUsername(), roles);
 
     }
 
     @Override
     public UserDto registerUser(RegisterUserRequestDto registerUserRequestDto)
-            throws UserExistsException, OperationForbiddenException {
+            throws UserExistsException, OperationForbiddenException, InvalidResourceException {
         if (isUsernameTaken(registerUserRequestDto.getUsername())) {
             throw new UserExistsException("User exists with username: " + registerUserRequestDto.getUsername());
         }
@@ -120,6 +123,9 @@ public class UserServiceImpl implements UserService {
 
             user.setRoles(Collections.singleton(role));
         } else {
+            if (registerUserRequestDto.getRoles().size() > 1) {
+                throw new InvalidResourceException("User cannot have multiple roles currently.");
+            }
             Set<Role> roles = new HashSet<>();
             for (RoleType roleType : registerUserRequestDto.getRoles()) {
                 Optional<Role> optionalRole = roleRepository.findByType(roleType);
@@ -155,9 +161,10 @@ public class UserServiceImpl implements UserService {
             return UserUtil.convertUsersToDtoList(users);
         }
         if (UserUtil.hasUserManagementAuthority(currentAuthenticatedUser.getRoles())) {
-            List<User> users =
-                    userRepository.findAllByIsDeletedAndCreatedBy(false, currentAuthenticatedUser.getUsername());
-            return UserUtil.convertUsersToDtoList(users);
+            List<User> users = userRepository.findAllByIsDeleted(false);
+            return UserUtil.convertUsersToDtoList(users.stream()
+                    .filter(user -> !UserUtil.hasAdminAuthority(UserUtil.convertRolesToDtoSet(user.getRoles())))
+                    .collect(Collectors.toList()));
         }
         throw new OperationForbiddenException("User: " + currentAuthenticatedUser.getUsername() +
                 " does not have authority to view all users");
@@ -185,7 +192,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDto updateUser(UUID uid, UpdateUserRequestDto updateUserRequestDto)
-            throws OperationForbiddenException, ResourceNotFoundException {
+            throws OperationForbiddenException, ResourceNotFoundException, InvalidResourceException {
         UserDto currentAuthenticatedUser = getCurrentAuthenticatedUser();
         if (currentAuthenticatedUser == null) {
             throw new OperationForbiddenException("Operation cannot be performed unauthenticated");
@@ -195,13 +202,11 @@ public class UserServiceImpl implements UserService {
             Set<RoleDto> roles = currentAuthenticatedUser.getRoles();
             User user = optionalUser.get();
             String username = user.getUsername();
-            String owner = user.getCreatedBy();
-            if (currentAuthenticatedUser.getUsername().equals(owner) ||
-                    currentAuthenticatedUser.getUsername().equals(username) || UserUtil.hasAdminAuthority(roles)) {
-                if (!StringUtils.isEmpty(updateUserRequestDto.getPassword())) {
-                    user.setPassword(passwordEncoder.encode(updateUserRequestDto.getPassword()));
-                }
+            if (currentAuthenticatedUser.getUsername().equals(username) || UserUtil.hasUserManagementAuthority(roles)) {
                 if (!ObjectUtils.isEmpty(updateUserRequestDto.getRoles())) {
+                    if (updateUserRequestDto.getRoles().size() > 1) {
+                        throw new InvalidResourceException("User cannot have multiple roles currently.");
+                    }
                     Set<Role> userRoles = new HashSet<>();
                     for (RoleType roleType : updateUserRequestDto.getRoles()) {
                         Optional<Role> optionalRole = roleRepository.findByType(roleType);
@@ -228,6 +233,28 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public void updateUserPassword(UUID uid, UpdatePasswordDto updatePasswordDto)
+            throws OperationForbiddenException, ResourceNotFoundException {
+        UserDto currentAuthenticatedUser = getCurrentAuthenticatedUser();
+        if (currentAuthenticatedUser == null) {
+            throw new OperationForbiddenException("Operation cannot be performed unauthenticated");
+        }
+        Optional<User> optionalUser = userRepository.findById(uid);
+        if (optionalUser.isPresent()) {
+            User user = optionalUser.get();
+            String currentPassword = updatePasswordDto.getCurrentPassword();
+            if (passwordEncoder.matches(currentPassword, user.getPassword())) {
+                user.setPassword(passwordEncoder.encode(updatePasswordDto.getNewPassword()));
+                userRepository.save(user);
+            } else {
+                throw new OperationForbiddenException("Current password does not match!");
+            }
+        } else {
+            throw new ResourceNotFoundException("User not present with the ID: " + uid);
+        }
+    }
+
+    @Override
     public void deleteUser(UUID uid) throws OperationForbiddenException, ResourceNotFoundException {
         UserDto currentAuthenticatedUser = getCurrentAuthenticatedUser();
         if (currentAuthenticatedUser == null) {
@@ -238,9 +265,7 @@ public class UserServiceImpl implements UserService {
             Set<RoleDto> roles = currentAuthenticatedUser.getRoles();
             User user = optionalUser.get();
             String username = user.getUsername();
-            String owner = user.getCreatedBy();
-            if (currentAuthenticatedUser.getUsername().equals(owner) ||
-                    currentAuthenticatedUser.getUsername().equals(username) || UserUtil.hasAdminAuthority(roles)) {
+            if (currentAuthenticatedUser.getUsername().equals(username) || UserUtil.hasUserManagementAuthority(roles)) {
                 user.setDeleted(true);
                 userRepository.save(user);
             } else {

@@ -1,11 +1,22 @@
 package com.manager.timezone.timezonemanagerserver.dto;
 
 import java.util.Set;
+import java.util.UUID;
 
 public class WhoAmIDto {
+    private UUID uid;
+
     private String username;
 
     private Set<RoleType> roles;
+
+    public UUID getUid() {
+        return uid;
+    }
+
+    public void setUid(UUID uid) {
+        this.uid = uid;
+    }
 
     public String getUsername() {
         return username;
