@@ -1,21 +1,18 @@
 package com.manager.timezone.timezonemanagerserver.dto;
 
-import javax.validation.constraints.Max;
-import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
-import java.util.Set;
+import javax.validation.constraints.Size;
 
 public class RegisterUserRequestDto {
     @NotBlank(message = "Username cannot be blank.")
-    @Min(value = 6, message = "Username must have minimum 6 characters")
-    @Max(value = 30, message = "Username must have maximum 30 characters")
+    @Size(min = 6, max = 30, message = "Username must have minimum 6 characters and maximum 30 characters")
     private String username;
 
     @NotBlank(message = "Password cannot be blank.")
-    @Min(value = 6, message = "Password must have minimum 6 characters")
+    @Size(min = 6, message = "Password must have minimum 6 characters")
     private String password;
 
-    private Set<RoleType> roles;
+    private RoleType role;
 
     public String getUsername() {
         return username;
@@ -33,11 +30,11 @@ public class RegisterUserRequestDto {
         this.password = password;
     }
 
-    public Set<RoleType> getRoles() {
-        return roles;
+    public RoleType getRole() {
+        return role;
     }
 
-    public void setRoles(Set<RoleType> roles) {
-        this.roles = roles;
+    public void setRole(RoleType role) {
+        this.role = role;
     }
 }

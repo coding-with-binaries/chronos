@@ -15,13 +15,13 @@ export interface AuthResponseDto {
   accessToken: string;
   uid: string;
   username: string;
-  roles: RoleType[];
+  role: RoleType;
 }
 
 export interface AuthUser {
   uid: string;
   username: string;
-  roles: RoleType[];
+  role: RoleType;
 }
 
 export interface UpdatePasswordDto {

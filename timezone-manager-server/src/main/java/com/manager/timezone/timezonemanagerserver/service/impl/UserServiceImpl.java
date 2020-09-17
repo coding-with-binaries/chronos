@@ -21,10 +21,10 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.util.ObjectUtils;
-import org.springframework.util.StringUtils;
 
-import java.util.*;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -69,9 +69,8 @@ public class UserServiceImpl implements UserService {
         WhoAmIDto whoAmI = new WhoAmIDto();
         whoAmI.setUid(currentAuthenticatedUser.getUid());
         whoAmI.setUsername(currentAuthenticatedUser.getUsername());
-        Set<RoleType> roles =
-                currentAuthenticatedUser.getRoles().stream().map(RoleDto::getType).collect(Collectors.toSet());
-        whoAmI.setRoles(roles);
+        RoleType role = currentAuthenticatedUser.getRole().getType();
+        whoAmI.setRole(role);
         return whoAmI;
     }
 
@@ -85,23 +84,22 @@ public class UserServiceImpl implements UserService {
 
         String jwt = tokenProvider.generateToken(authentication);
         UserDto currentAuthenticatedUser = getCurrentAuthenticatedUser();
-        Set<RoleType> roles =
-                currentAuthenticatedUser.getRoles().stream().map(RoleDto::getType).collect(Collectors.toSet());
+        RoleType role = currentAuthenticatedUser.getRole().getType();
         return new AuthenticateUserResponseDto(jwt, currentAuthenticatedUser.getUid(),
-                currentAuthenticatedUser.getUsername(), roles);
+                currentAuthenticatedUser.getUsername(), role);
 
     }
 
     @Override
     public UserDto registerUser(RegisterUserRequestDto registerUserRequestDto)
-            throws UserExistsException, OperationForbiddenException, InvalidResourceException {
+            throws UserExistsException, OperationForbiddenException {
         if (isUsernameTaken(registerUserRequestDto.getUsername())) {
             throw new UserExistsException("User exists with username: " + registerUserRequestDto.getUsername());
         }
         UserDto currentAuthenticatedUser = getCurrentAuthenticatedUser();
         if (currentAuthenticatedUser != null) {
-            Set<RoleDto> roles = currentAuthenticatedUser.getRoles();
-            if (!UserUtil.hasUserManagementAuthority(roles)) {
+            RoleDto role = currentAuthenticatedUser.getRole();
+            if (!UserUtil.hasUserManagementAuthority(role)) {
                 throw new OperationForbiddenException("User: " + currentAuthenticatedUser.getUsername() +
                         " does not have authority to create another user");
             }
@@ -110,44 +108,24 @@ public class UserServiceImpl implements UserService {
         user.setUsername(registerUserRequestDto.getUsername());
         user.setPassword(passwordEncoder.encode(registerUserRequestDto.getPassword()));
 
-        if (ObjectUtils.isEmpty(registerUserRequestDto.getRoles())) {
-            Optional<Role> optionalRole = roleRepository.findByType(RoleType.user);
-            Role role;
-            if (optionalRole.isEmpty()) {
-                role = new Role();
-                role.setType(RoleType.user);
-                roleRepository.save(role);
-            } else {
-                role = optionalRole.get();
-            }
-
-            user.setRoles(Collections.singleton(role));
-        } else {
-            if (registerUserRequestDto.getRoles().size() > 1) {
-                throw new InvalidResourceException("User cannot have multiple roles currently.");
-            }
-            Set<Role> roles = new HashSet<>();
-            for (RoleType roleType : registerUserRequestDto.getRoles()) {
-                Optional<Role> optionalRole = roleRepository.findByType(roleType);
-                Role role;
-                if (optionalRole.isEmpty()) {
-                    role = new Role();
-                    role.setType(roleType);
-                    roleRepository.save(role);
-                } else {
-                    role = optionalRole.get();
-                }
-                roles.add(role);
-            }
-            user.setRoles(roles);
+        RoleType roleType = registerUserRequestDto.getRole();
+        if (roleType == null) {
+            roleType = RoleType.user;
         }
+        Optional<Role> optionalRole = roleRepository.findByType(roleType);
+        Role role;
+        if (optionalRole.isEmpty()) {
+            role = new Role();
+            role.setType(roleType);
+            role = roleRepository.save(role);
+        } else {
+            role = optionalRole.get();
+        }
+        user.setRole(role);
 
-        userRepository.saveAndFlush(user);
+        user = userRepository.saveAndFlush(user);
 
-        UserDto userDto = UserUtil.convertUserToDto(user);
-        String createdBy = currentAuthenticatedUser == null ? "system" : currentAuthenticatedUser.getUsername();
-        userDto.setCreatedBy(createdBy);
-        return userDto;
+        return UserUtil.convertUserToDto(user);
     }
 
     @Override
@@ -156,14 +134,14 @@ public class UserServiceImpl implements UserService {
         if (currentAuthenticatedUser == null) {
             throw new OperationForbiddenException("User must be authenticated to view all users.");
         }
-        if (UserUtil.hasAdminAuthority(currentAuthenticatedUser.getRoles())) {
-            List<User> users = userRepository.findAllByIsDeleted(false);
+        if (UserUtil.hasAdminAuthority(currentAuthenticatedUser.getRole())) {
+            List<User> users = userRepository.findAll();
             return UserUtil.convertUsersToDtoList(users);
         }
-        if (UserUtil.hasUserManagementAuthority(currentAuthenticatedUser.getRoles())) {
-            List<User> users = userRepository.findAllByIsDeleted(false);
+        if (UserUtil.hasUserManagementAuthority(currentAuthenticatedUser.getRole())) {
+            List<User> users = userRepository.findAll();
             return UserUtil.convertUsersToDtoList(users.stream()
-                    .filter(user -> !UserUtil.hasAdminAuthority(UserUtil.convertRolesToDtoSet(user.getRoles())))
+                    .filter(user -> !UserUtil.hasAdminAuthority(user.getRole()))
                     .collect(Collectors.toList()));
         }
         throw new OperationForbiddenException("User: " + currentAuthenticatedUser.getUsername() +
@@ -176,14 +154,15 @@ public class UserServiceImpl implements UserService {
         if (currentAuthenticatedUser == null) {
             throw new OperationForbiddenException("Operation cannot be performed unauthenticated");
         }
-        Optional<User> optionalUser = userRepository.findByUidAndIsDeleted(uid, false);
+        Optional<User> optionalUser = userRepository.findById(uid);
         if (optionalUser.isPresent()) {
-            Set<RoleDto> roles = currentAuthenticatedUser.getRoles();
+            RoleDto role = currentAuthenticatedUser.getRole();
             User user = optionalUser.get();
             String username = user.getUsername();
-            String owner = user.getCreatedBy();
-            if (currentAuthenticatedUser.getUsername().equals(owner) ||
-                    currentAuthenticatedUser.getUsername().equals(username) || UserUtil.hasAdminAuthority(roles)) {
+            if (currentAuthenticatedUser.getUsername().equals(username) || UserUtil.hasAdminAuthority(role)) {
+                return UserUtil.convertUserToDto(user);
+            }
+            if (UserUtil.hasUserManagementAuthority(role) && !UserUtil.hasAdminAuthority(user.getRole())) {
                 return UserUtil.convertUserToDto(user);
             }
         }
@@ -199,30 +178,29 @@ public class UserServiceImpl implements UserService {
         }
         Optional<User> optionalUser = userRepository.findById(uid);
         if (optionalUser.isPresent()) {
-            Set<RoleDto> roles = currentAuthenticatedUser.getRoles();
+            RoleDto currentAuthenticatedUserRole = currentAuthenticatedUser.getRole();
             User user = optionalUser.get();
             String username = user.getUsername();
-            if (currentAuthenticatedUser.getUsername().equals(username) || UserUtil.hasUserManagementAuthority(roles)) {
-                if (!ObjectUtils.isEmpty(updateUserRequestDto.getRoles())) {
-                    if (updateUserRequestDto.getRoles().size() > 1) {
-                        throw new InvalidResourceException("User cannot have multiple roles currently.");
+            if (currentAuthenticatedUser.getUsername().equals(username) ||
+                    UserUtil.hasAdminAuthority(currentAuthenticatedUserRole) ||
+                    (UserUtil.hasUserManagementAuthority(currentAuthenticatedUserRole) &&
+                            !UserUtil.hasAdminAuthority(user.getRole()))) {
+                if (updateUserRequestDto.getRole() != null) {
+                    RoleType roleType = updateUserRequestDto.getRole();
+                    Optional<Role> optionalRole = roleRepository.findByType(roleType);
+                    Role role;
+                    if (optionalRole.isEmpty()) {
+                        role = new Role();
+                        role.setType(roleType);
+                        role = roleRepository.save(role);
+                    } else {
+                        role = optionalRole.get();
                     }
-                    Set<Role> userRoles = new HashSet<>();
-                    for (RoleType roleType : updateUserRequestDto.getRoles()) {
-                        Optional<Role> optionalRole = roleRepository.findByType(roleType);
-                        Role role;
-                        if (optionalRole.isEmpty()) {
-                            role = new Role();
-                            role.setType(RoleType.user);
-                            roleRepository.save(role);
-                        } else {
-                            role = optionalRole.get();
-                        }
-                        userRoles.add(role);
-                    }
-                    user.setRoles(userRoles);
+                    user.setRole(role);
+                    return UserUtil.convertUserToDto(userRepository.save(user));
+                } else {
+                    throw new InvalidResourceException("User role cannot be blank");
                 }
-                return UserUtil.convertUserToDto(userRepository.save(user));
             } else {
                 throw new OperationForbiddenException("User: " + currentAuthenticatedUser.getUsername() +
                         " does not have the authorization to update the user.");
@@ -262,12 +240,14 @@ public class UserServiceImpl implements UserService {
         }
         Optional<User> optionalUser = userRepository.findById(uid);
         if (optionalUser.isPresent()) {
-            Set<RoleDto> roles = currentAuthenticatedUser.getRoles();
+            RoleDto currentAuthenticatedUserRole = currentAuthenticatedUser.getRole();
             User user = optionalUser.get();
             String username = user.getUsername();
-            if (currentAuthenticatedUser.getUsername().equals(username) || UserUtil.hasUserManagementAuthority(roles)) {
-                user.setDeleted(true);
-                userRepository.save(user);
+            if (currentAuthenticatedUser.getUsername().equals(username) ||
+                    UserUtil.hasAdminAuthority(currentAuthenticatedUserRole) ||
+                    (UserUtil.hasUserManagementAuthority(currentAuthenticatedUserRole) &&
+                            !UserUtil.hasAdminAuthority(user.getRole()))) {
+                userRepository.delete(user);
             } else {
                 throw new OperationForbiddenException("User: " + currentAuthenticatedUser.getUsername() +
                         " does not have the authorization to delete the user.");

@@ -149,7 +149,7 @@ const TimeZones: React.FC = () => {
         )
       }
     ];
-    if (authUser && hasAdminRoles(authUser.roles)) {
+    if (authUser && hasAdminRoles(authUser.role)) {
       columns.push({
         title: 'Created By',
         dataIndex: 'createdBy',

@@ -131,9 +131,6 @@ public class UserController {
         } catch (OperationForbiddenException e) {
             ErrorResponseDto errorResponseDto = new ErrorResponseDto(HttpStatus.UNAUTHORIZED, e.getMessage());
             return new ResponseEntity<>(errorResponseDto, HttpStatus.UNAUTHORIZED);
-        } catch (InvalidResourceException e) {
-            ErrorResponseDto errorResponseDto = new ErrorResponseDto(HttpStatus.BAD_REQUEST, e.getMessage());
-            return new ResponseEntity<>(errorResponseDto, HttpStatus.BAD_REQUEST);
         } catch (Exception e) {
             ErrorResponseDto errorResponseDto = new ErrorResponseDto(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
             return new ResponseEntity<>(errorResponseDto, HttpStatus.INTERNAL_SERVER_ERROR);

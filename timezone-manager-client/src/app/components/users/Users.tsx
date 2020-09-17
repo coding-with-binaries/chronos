@@ -52,7 +52,7 @@ const Users: React.FC = () => {
       return {
         key: u.uid,
         username: u.username,
-        roles: u.roles,
+        role: u.role,
         createdBy: getUserCreatedBy(u.username, u.createdBy),
         actions: u.uid
       };
@@ -144,20 +144,17 @@ const Users: React.FC = () => {
             value: RoleType.user
           }
         ],
-        render: (_, user) => (
+        render: (_, { role }) => (
           <Space size="small">
-            {user.roles.map(r => (
-              <Tag key={r.uid} color="geekblue">
-                {ROLE_MAPPING[r.type] || r.type}
-              </Tag>
-            ))}
+            <Tag key={role.uid} color="geekblue">
+              {ROLE_MAPPING[role.type] || role.type}
+            </Tag>
           </Space>
         ),
-        onFilter: (filterValue, user) =>
-          user.roles.findIndex(r => r.type === filterValue) >= 0
+        onFilter: (filterValue, user) => user.role.type === filterValue
       }
     ];
-    if (authUser && hasAdminRoles(authUser.roles)) {
+    if (authUser && hasAdminRoles(authUser.role)) {
       columns.push({
         title: 'Created By',
         dataIndex: 'createdBy',
@@ -200,7 +197,7 @@ const Users: React.FC = () => {
       initialValues: {
         username: '',
         password: '',
-        roles: []
+        role: RoleType.user
       }
     });
   };
@@ -212,7 +209,7 @@ const Users: React.FC = () => {
       initialValues: {
         username: user.username,
         password: '',
-        roles: user.roles.map(r => r.type)
+        role: user.role.type
       }
     });
   };

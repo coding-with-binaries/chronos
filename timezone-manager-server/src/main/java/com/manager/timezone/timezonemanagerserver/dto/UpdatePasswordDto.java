@@ -1,11 +1,11 @@
 package com.manager.timezone.timezonemanagerserver.dto;
 
-import javax.validation.constraints.Min;
+import javax.validation.constraints.Size;
 
 public class UpdatePasswordDto {
     private String currentPassword;
 
-    @Min(value = 6, message = "Password must have minimum 6 characters")
+    @Size(min = 6, message = "Password must have minimum 6 characters")
     private String newPassword;
 
     public String getCurrentPassword() {

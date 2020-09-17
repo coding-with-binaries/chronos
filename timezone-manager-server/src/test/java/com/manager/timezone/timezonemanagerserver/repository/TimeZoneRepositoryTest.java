@@ -23,7 +23,7 @@ public class TimeZoneRepositoryTest {
     private TimeZoneRepository timeZoneRepository;
 
     @Test
-    public void whenFindByName_thenReturnEmployee() {
+    public void whenFindAllByCreatedBy_thenReturnTimeZones() {
         TimeZone bengaluruTimeZone = new TimeZone();
         bengaluruTimeZone.setTimeZoneName("Bengaluru Time Zone");
         bengaluruTimeZone.setLocationName("Bengaluru, India");
@@ -34,7 +34,6 @@ public class TimeZoneRepositoryTest {
 
         List<TimeZone> timeZones = timeZoneRepository.findAllByCreatedBy("varun");
 
-        // then
         assertEquals(1, timeZones.size());
         assertEquals(bengaluruTimeZone.getTimeZoneName(), timeZones.get(0).getTimeZoneName());
     }

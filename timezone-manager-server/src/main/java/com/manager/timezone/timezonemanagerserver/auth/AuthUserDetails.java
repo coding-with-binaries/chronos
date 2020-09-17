@@ -18,10 +18,9 @@ public class AuthUserDetails implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        Set<Role> roles = user.getRoles();
+        Role role = user.getRole();
 
-        return roles.stream().map(role -> new SimpleGrantedAuthority(role.getType().name()))
-                .collect(Collectors.toList());
+        return Collections.singletonList(new SimpleGrantedAuthority(role.getType().name()));
     }
 
     public UUID getUid() {

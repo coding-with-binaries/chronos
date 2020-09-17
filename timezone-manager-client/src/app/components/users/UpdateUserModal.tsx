@@ -5,6 +5,7 @@ import { Dispatch } from 'redux';
 import { addUser, editUser } from '../../actions/users/Actions';
 import { UserAction } from '../../actions/users/ActionTypes';
 import UserApi from '../../api/user/User';
+import { USERNAME_REGEX } from '../../constants/Regex';
 import { ROLE_MAPPING } from '../../constants/Roles';
 import { StoreState } from '../../types';
 import { AuthStore, RoleType } from '../../types/Auth';
@@ -52,7 +53,7 @@ const UpdateUserModal: React.FC<Props> = props => {
         const registerUserDto: RegisterUserDto = {
           username: formValues.username,
           password: formValues.password,
-          roles: [formValues.role]
+          role: formValues.role
         };
         dispatch(addUser(registerUserDto));
         form.resetFields();
@@ -60,7 +61,7 @@ const UpdateUserModal: React.FC<Props> = props => {
       } else if (mode === 'EDIT' && !!uid) {
         const updateUserDto: UpdateUserDto = {
           password: formValues.password,
-          roles: [formValues.role]
+          role: formValues.role
         };
         dispatch(editUser(uid, updateUserDto));
         onDismiss();
@@ -70,7 +71,7 @@ const UpdateUserModal: React.FC<Props> = props => {
     }
   };
 
-  const isAdmin = !!authUser && hasAdminRoles(authUser.roles);
+  const isAdmin = !!authUser && hasAdminRoles(authUser.role);
   const allowedRoles = Object.entries(ROLE_MAPPING).filter(
     ([roleType]) => isAdmin || roleType !== RoleType.admin
   );
@@ -85,15 +86,27 @@ const UpdateUserModal: React.FC<Props> = props => {
       onOk={onSubmit}
       width={800}
     >
-      <Form
-        form={form}
-        layout="vertical"
-        initialValues={{ ...initialValues, role: initialValues.roles[0] }}
-      >
+      <Form form={form} layout="vertical" initialValues={initialValues}>
         <Form.Item
           name="username"
           label="Username"
-          rules={[{ required: true, message: 'Please input the username!' }]}
+          hasFeedback
+          rules={[
+            { required: true, message: 'Please input your Username!' },
+            {
+              min: 6,
+              message: 'Username must contain minimum 6 characters!'
+            },
+            {
+              max: 30,
+              message: 'Username must contain maximum 30 characters!'
+            },
+            {
+              pattern: USERNAME_REGEX,
+              message:
+                'Only (.) and (_) are allowed as special characters! These cannot be together!'
+            }
+          ]}
         >
           <Input disabled={mode === 'EDIT'} placeholder="Enter Username here" />
         </Form.Item>

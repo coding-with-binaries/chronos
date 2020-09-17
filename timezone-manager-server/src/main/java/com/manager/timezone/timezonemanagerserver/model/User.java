@@ -1,8 +1,6 @@
 package com.manager.timezone.timezonemanagerserver.model;
 
 import javax.persistence.*;
-import java.util.HashSet;
-import java.util.Set;
 
 @Table(name = "users")
 @Entity
@@ -12,17 +10,13 @@ public class User extends BaseEntity {
 
     private String password;
 
-    private boolean isEnabled = true;
+    private boolean enabled = true;
 
-    private boolean isDeleted = false;
+    private boolean deactivated = false;
 
-    @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-    @JoinTable(
-            name = "user_roles",
-            joinColumns = @JoinColumn(name = "user_uid"),
-            inverseJoinColumns = @JoinColumn(name = "role_uid")
-    )
-    private Set<Role> roles = new HashSet<>();
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "role_id", referencedColumnName = "uid")
+    private Role role;
 
     public String getUsername() {
         return username;
@@ -41,26 +35,26 @@ public class User extends BaseEntity {
     }
 
     public boolean isEnabled() {
-        return isEnabled;
+        return enabled;
     }
 
     public void setEnabled(boolean enabled) {
-        isEnabled = enabled;
+        this.enabled = enabled;
     }
 
-    public boolean isDeleted() {
-        return isDeleted;
+    public boolean isDeactivated() {
+        return deactivated;
     }
 
-    public void setDeleted(boolean deleted) {
-        isDeleted = deleted;
+    public void setDeactivated(boolean deactivated) {
+        this.deactivated = deactivated;
     }
 
-    public Set<Role> getRoles() {
-        return roles;
+    public Role getRole() {
+        return role;
     }
 
-    public void setRoles(Set<Role> roles) {
-        this.roles = roles;
+    public void setRole(Role role) {
+        this.role = role;
     }
 }

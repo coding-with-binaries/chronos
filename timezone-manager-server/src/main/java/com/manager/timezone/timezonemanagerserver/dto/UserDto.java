@@ -7,7 +7,7 @@ public class UserDto extends BaseDto {
 
     private boolean isEnabled;
 
-    private Set<RoleDto> roles;
+    private RoleDto role;
 
     public String getUsername() {
         return username;
@@ -25,11 +25,11 @@ public class UserDto extends BaseDto {
         isEnabled = enabled;
     }
 
-    public Set<RoleDto> getRoles() {
-        return roles;
+    public RoleDto getRole() {
+        return role;
     }
 
-    public void setRoles(Set<RoleDto> roles) {
-        this.roles = roles;
+    public void setRole(RoleDto role) {
+        this.role = role;
     }
 }

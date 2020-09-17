@@ -1,15 +1,13 @@
 package com.manager.timezone.timezonemanagerserver.dto;
 
-import java.util.Set;
-
 public class UpdateUserRequestDto {
-    private Set<RoleType> roles;
+    private RoleType role;
 
-    public Set<RoleType> getRoles() {
-        return roles;
+    public RoleType getRole() {
+        return role;
     }
 
-    public void setRoles(Set<RoleType> roles) {
-        this.roles = roles;
+    public void setRole(RoleType role) {
+        this.role = role;
     }
 }

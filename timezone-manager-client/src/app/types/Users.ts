@@ -12,7 +12,7 @@ export interface User {
   createdBy: string;
   enabled: boolean;
   lastModifiedBy: string;
-  roles: Role[];
+  role: Role;
   uid: string;
   username: string;
 }
@@ -20,12 +20,12 @@ export interface User {
 export interface RegisterUserDto {
   username: string;
   password: string;
-  roles: RoleType[];
+  role: RoleType;
 }
 
 export interface UpdateUserDto {
   password: string;
-  roles: RoleType[];
+  role: RoleType;
 }
 
 export interface UsersStore {

@@ -11,7 +11,7 @@ import {
 } from '../actions/auth/Actions';
 import { AuthenticateUser, SignOutUser } from '../actions/auth/ActionTypes';
 import UserApi from '../api/user/User';
-import { AuthResponseDto, AuthUser } from '../types/Auth';
+import { AuthResponseDto, AuthUser, RoleType } from '../types/Auth';
 import { ErrorResponse } from '../types/Common';
 import { RegisterUserDto } from '../types/Users';
 import {
@@ -36,12 +36,12 @@ function* watchForGetCurrentUser() {
 
 function* authenticateUserSaga(action: AuthenticateUser) {
   try {
-    const { accessToken, uid, username, roles }: AuthResponseDto = yield call(
+    const { accessToken, uid, username, role }: AuthResponseDto = yield call(
       UserApi.authenticateUser,
       action.payload.authRequestDto
     );
     setAuthorizationToken(accessToken);
-    const authUser: AuthUser = { uid, username, roles };
+    const authUser: AuthUser = { uid, username, role };
     yield put(authenticateUserSuccess(accessToken, authUser));
     yield put(push('/'));
   } catch (e) {
@@ -59,7 +59,7 @@ function* registerUserSaga(action: AuthenticateUser) {
   try {
     const registerUserDto: RegisterUserDto = {
       ...action.payload.authRequestDto,
-      roles: []
+      role: RoleType.user
     };
     yield call(UserApi.registerUser, registerUserDto);
     yield put(registerUserSuccess());

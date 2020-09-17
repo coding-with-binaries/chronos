@@ -23,6 +23,7 @@ import static org.junit.Assert.assertTrue;
 
 @RunWith(SpringRunner.class)
 public class UserControllerTest {
+    private static final String USERNAME = "varun";
 
     @InjectMocks
     private UserController userController = new UserController();
@@ -33,7 +34,7 @@ public class UserControllerTest {
     @Test
     public void test_getAllUsers_Success200OK() throws OperationForbiddenException {
         UserDto user = new UserDto();
-        user.setUsername("varun");
+        user.setUsername(USERNAME);
 
         List<UserDto> users = Collections.singletonList(user);
         PowerMockito.when(userService.getAllUsers()).thenReturn(users);
@@ -71,7 +72,7 @@ public class UserControllerTest {
     public void test_getUser_Success200OK() throws ResourceNotFoundException, OperationForbiddenException {
         String uid = UUID.randomUUID().toString();
         UserDto updatedUser = new UserDto();
-        updatedUser.setUsername("varun");
+        updatedUser.setUsername(USERNAME);
 
         PowerMockito.when(userService.getUser(UUID.fromString(uid))).thenReturn(updatedUser);
 
@@ -84,7 +85,7 @@ public class UserControllerTest {
     public void test_getUser_Failed401Unauthorized() throws ResourceNotFoundException, OperationForbiddenException {
         String uid = UUID.randomUUID().toString();
         UserDto updatedUser = new UserDto();
-        updatedUser.setUsername("varun");
+        updatedUser.setUsername(USERNAME);
 
         PowerMockito.when(userService.getUser(UUID.fromString(uid))).thenThrow(OperationForbiddenException.class);
 
@@ -98,7 +99,7 @@ public class UserControllerTest {
     public void test_getUser_Failed404NotFound() throws ResourceNotFoundException, OperationForbiddenException {
         String uid = UUID.randomUUID().toString();
         UserDto updatedUser = new UserDto();
-        updatedUser.setUsername("varun");
+        updatedUser.setUsername(USERNAME);
 
         PowerMockito.when(userService.getUser(UUID.fromString(uid))).thenThrow(ResourceNotFoundException.class);
 
@@ -113,7 +114,7 @@ public class UserControllerTest {
             throws ResourceNotFoundException, OperationForbiddenException {
         String uid = UUID.randomUUID().toString();
         UserDto updatedUser = new UserDto();
-        updatedUser.setUsername("varun");
+        updatedUser.setUsername(USERNAME);
 
         PowerMockito.when(userService.getUser(UUID.fromString(uid))).thenThrow(RuntimeException.class);
 
@@ -126,7 +127,7 @@ public class UserControllerTest {
     @Test
     public void test_whoAmI_Success200OK() {
         WhoAmIDto whoAmIDto = new WhoAmIDto();
-        whoAmIDto.setUsername("varun");
+        whoAmIDto.setUsername(USERNAME);
 
         PowerMockito.when(userService.whoAmI()).thenReturn(whoAmIDto);
 
@@ -160,10 +161,10 @@ public class UserControllerTest {
     @Test
     public void test_authenticateUser_Success200OK() {
         AuthenticateUserRequestDto requestDto = new AuthenticateUserRequestDto();
-        requestDto.setUsername("VARUN");
+        requestDto.setUsername(USERNAME);
 
         AuthenticateUserResponseDto responseDto = new AuthenticateUserResponseDto();
-        responseDto.setUsername("varun");
+        responseDto.setUsername(USERNAME);
 
         PowerMockito.when(userService.authenticateUser(requestDto)).thenReturn(responseDto);
 
@@ -175,7 +176,7 @@ public class UserControllerTest {
     @Test
     public void test_authenticateUser_Failed500InternalServerError() {
         AuthenticateUserRequestDto requestDto = new AuthenticateUserRequestDto();
-        requestDto.setUsername("varun");
+        requestDto.setUsername(USERNAME);
         PowerMockito.when(userService.authenticateUser(requestDto)).thenThrow(RuntimeException.class);
 
         var response = userController.authenticateUser(requestDto);
@@ -185,13 +186,12 @@ public class UserControllerTest {
     }
 
     @Test
-    public void test_registerUser_Success200OK()
-            throws InvalidResourceException, OperationForbiddenException, UserExistsException {
+    public void test_registerUser_Success200OK() throws OperationForbiddenException, UserExistsException {
         RegisterUserRequestDto requestDto = new RegisterUserRequestDto();
-        requestDto.setUsername("VARUN");
+        requestDto.setUsername(USERNAME);
 
         UserDto userDto = new UserDto();
-        userDto.setUsername("varun");
+        userDto.setUsername(USERNAME);
 
         PowerMockito.when(userService.registerUser(requestDto)).thenReturn(userDto);
 
@@ -201,23 +201,9 @@ public class UserControllerTest {
     }
 
     @Test
-    public void test_registerUser_Failed400BadRequest()
-            throws InvalidResourceException, OperationForbiddenException, UserExistsException {
+    public void test_registerUser_Failed401Unauthorized() throws OperationForbiddenException, UserExistsException {
         RegisterUserRequestDto requestDto = new RegisterUserRequestDto();
-        requestDto.setUsername("varun");
-        PowerMockito.when(userService.registerUser(requestDto)).thenThrow(InvalidResourceException.class);
-
-        var response = userController.registerUser(requestDto);
-        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-        assertTrue(response.getBody() instanceof ErrorResponseDto);
-        assertEquals(400, ((ErrorResponseDto) response.getBody()).getStatusCode());
-    }
-
-    @Test
-    public void test_registerUser_Failed401Unauthorized()
-            throws InvalidResourceException, OperationForbiddenException, UserExistsException {
-        RegisterUserRequestDto requestDto = new RegisterUserRequestDto();
-        requestDto.setUsername("varun");
+        requestDto.setUsername(USERNAME);
         PowerMockito.when(userService.registerUser(requestDto)).thenThrow(OperationForbiddenException.class);
 
         var response = userController.registerUser(requestDto);
@@ -227,10 +213,9 @@ public class UserControllerTest {
     }
 
     @Test
-    public void test_registerUser_Failed409Conflict()
-            throws InvalidResourceException, OperationForbiddenException, UserExistsException {
+    public void test_registerUser_Failed409Conflict() throws OperationForbiddenException, UserExistsException {
         RegisterUserRequestDto requestDto = new RegisterUserRequestDto();
-        requestDto.setUsername("varun");
+        requestDto.setUsername(USERNAME);
         PowerMockito.when(userService.registerUser(requestDto)).thenThrow(UserExistsException.class);
 
         var response = userController.registerUser(requestDto);
@@ -241,9 +226,9 @@ public class UserControllerTest {
 
     @Test
     public void test_registerUser_Failed500InternalServerError()
-            throws InvalidResourceException, OperationForbiddenException, UserExistsException {
+            throws OperationForbiddenException, UserExistsException {
         RegisterUserRequestDto requestDto = new RegisterUserRequestDto();
-        requestDto.setUsername("varun");
+        requestDto.setUsername(USERNAME);
         PowerMockito.when(userService.registerUser(requestDto)).thenThrow(RuntimeException.class);
 
         var response = userController.registerUser(requestDto);
@@ -321,6 +306,59 @@ public class UserControllerTest {
     }
 
     @Test
+    public void test_updateUserPassword_Success200OK() throws OperationForbiddenException, ResourceNotFoundException {
+        UUID uid = UUID.randomUUID();
+        UpdatePasswordDto updatePasswordDto = new UpdatePasswordDto();
+
+        PowerMockito.doNothing().when(userService).updateUserPassword(uid, updatePasswordDto);
+
+        var response = userController.updateUserPassword(uid.toString(), updatePasswordDto);
+        assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
+    }
+
+    @Test
+    public void test_updateUserPassword_Failed401Unauthorized()
+            throws ResourceNotFoundException, OperationForbiddenException {
+        UUID uid = UUID.randomUUID();
+        UpdatePasswordDto updatePasswordDto = new UpdatePasswordDto();
+        PowerMockito.doThrow(new OperationForbiddenException()).when(userService)
+                .updateUserPassword(uid, updatePasswordDto);
+
+        var response = userController.updateUserPassword(uid.toString(), updatePasswordDto);
+        assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
+        assertTrue(response.getBody() instanceof ErrorResponseDto);
+        assertEquals(401, ((ErrorResponseDto) response.getBody()).getStatusCode());
+    }
+
+    @Test
+    public void test_updateUserPassword_Failed404NotFound()
+            throws ResourceNotFoundException, OperationForbiddenException {
+        UUID uid = UUID.randomUUID();
+        UpdatePasswordDto updatePasswordDto = new UpdatePasswordDto();
+        PowerMockito.doThrow(new ResourceNotFoundException()).when(userService)
+                .updateUserPassword(uid, updatePasswordDto);
+
+        var response = userController.updateUserPassword(uid.toString(), updatePasswordDto);
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+        assertTrue(response.getBody() instanceof ErrorResponseDto);
+        assertEquals(404, ((ErrorResponseDto) response.getBody()).getStatusCode());
+    }
+
+    @Test
+    public void test_updateUserPassword_Failed500InternalServerError()
+            throws ResourceNotFoundException, OperationForbiddenException {
+        UUID uid = UUID.randomUUID();
+        UpdatePasswordDto updatePasswordDto = new UpdatePasswordDto();
+        PowerMockito.doThrow(new RuntimeException()).when(userService)
+                .updateUserPassword(uid, updatePasswordDto);
+
+        var response = userController.updateUserPassword(uid.toString(), updatePasswordDto);
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
+        assertTrue(response.getBody() instanceof ErrorResponseDto);
+        assertEquals(500, ((ErrorResponseDto) response.getBody()).getStatusCode());
+    }
+
+    @Test
     public void test_deleteUser_Success200OK() throws OperationForbiddenException, ResourceNotFoundException {
         UUID uid = UUID.randomUUID();
 
@@ -356,7 +394,8 @@ public class UserControllerTest {
     }
 
     @Test
-    public void test_deleteUser_Failed500InternalServerError() throws OperationForbiddenException, ResourceNotFoundException {
+    public void test_deleteUser_Failed500InternalServerError()
+            throws OperationForbiddenException, ResourceNotFoundException {
         UUID uid = UUID.randomUUID();
 
         PowerMockito.doThrow(new RuntimeException()).when(userService).deleteUser(uid);

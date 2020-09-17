@@ -33,6 +33,8 @@ public class TimeZoneServiceTest {
 
     private static final String NEPAL_TIME_ZONE = "Nepal";
 
+    private static final String USERNAME = "varun";
+
     @TestConfiguration
     static class TimeZoneServiceTestContextConfiguration {
 
@@ -55,7 +57,7 @@ public class TimeZoneServiceTest {
     public void setUp() {
         TimeZone bengaluruTimeZone = new TimeZone();
         bengaluruTimeZone.setTimeZoneName(BENGALURU_TIME_ZONE);
-        bengaluruTimeZone.setCreatedBy("varun");
+        bengaluruTimeZone.setCreatedBy(USERNAME);
 
         TimeZone nepalTimeZone = new TimeZone();
         nepalTimeZone.setTimeZoneName(NEPAL_TIME_ZONE);
@@ -75,10 +77,10 @@ public class TimeZoneServiceTest {
         PowerMockito.doNothing().when(timeZoneRepository).delete(any());
 
         UserDto currentAuthenticatedUser = new UserDto();
-        currentAuthenticatedUser.setUsername("varun");
+        currentAuthenticatedUser.setUsername(USERNAME);
         RoleDto roleDto = new RoleDto();
         roleDto.setType(RoleType.admin);
-        currentAuthenticatedUser.setRoles(new HashSet<>(Collections.singletonList(roleDto)));
+        currentAuthenticatedUser.setRole(roleDto);
         PowerMockito.when(userService.getCurrentAuthenticatedUser()).thenReturn(currentAuthenticatedUser);
     }
 
@@ -100,7 +102,7 @@ public class TimeZoneServiceTest {
         currentAuthenticatedUser.setUsername("user");
         RoleDto roleDto = new RoleDto();
         roleDto.setType(RoleType.user);
-        currentAuthenticatedUser.setRoles(new HashSet<>(Collections.singletonList(roleDto)));
+        currentAuthenticatedUser.setRole(roleDto);
         PowerMockito.when(userService.getCurrentAuthenticatedUser()).thenReturn(currentAuthenticatedUser);
 
         List<TimeZoneDto> timeZones = timeZoneService.getAllAuthorizedTimeZones();
@@ -133,7 +135,7 @@ public class TimeZoneServiceTest {
         currentAuthenticatedUser.setUsername("user");
         RoleDto roleDto = new RoleDto();
         roleDto.setType(RoleType.user);
-        currentAuthenticatedUser.setRoles(new HashSet<>(Collections.singletonList(roleDto)));
+        currentAuthenticatedUser.setRole(roleDto);
         PowerMockito.when(userService.getCurrentAuthenticatedUser()).thenReturn(currentAuthenticatedUser);
 
         List<TimeZoneDto> timeZones = timeZoneService.getAllAuthorizedTimeZonesByName(BENGALURU_TIME_ZONE);
@@ -208,7 +210,7 @@ public class TimeZoneServiceTest {
         currentAuthenticatedUser.setUsername("user");
         RoleDto roleDto = new RoleDto();
         roleDto.setType(RoleType.user);
-        currentAuthenticatedUser.setRoles(new HashSet<>(Collections.singletonList(roleDto)));
+        currentAuthenticatedUser.setRole(roleDto);
         PowerMockito.when(userService.getCurrentAuthenticatedUser()).thenReturn(currentAuthenticatedUser);
 
         TimeZoneDto givenTimeZone = new TimeZoneDto();
@@ -249,7 +251,7 @@ public class TimeZoneServiceTest {
         currentAuthenticatedUser.setUsername("user");
         RoleDto roleDto = new RoleDto();
         roleDto.setType(RoleType.user);
-        currentAuthenticatedUser.setRoles(new HashSet<>(Collections.singletonList(roleDto)));
+        currentAuthenticatedUser.setRole(roleDto);
         PowerMockito.when(userService.getCurrentAuthenticatedUser()).thenReturn(currentAuthenticatedUser);
 
         TimeZoneDto givenTimeZone = new TimeZoneDto();

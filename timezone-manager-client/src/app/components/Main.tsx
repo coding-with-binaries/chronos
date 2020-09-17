@@ -51,7 +51,7 @@ const Main: React.FC = () => {
         Time Zones
       </Menu.Item>
     ];
-    if (authUser && hasUserManagerRoles(authUser.roles)) {
+    if (authUser && hasUserManagerRoles(authUser.role)) {
       menuItems.push(
         <Menu.Item key="users" icon={<UserOutlined />}>
           Users
@@ -112,13 +112,13 @@ const Main: React.FC = () => {
     }
 
     if (asyncState === AsyncState.Completed && authUser) {
-      const { roles } = authUser;
+      const { role } = authUser;
       let availableRoutes = [
         <Route key="time-zones" path="/time-zones">
           <TimeZones />
         </Route>
       ];
-      if (hasUserManagerRoles(roles)) {
+      if (hasUserManagerRoles(role)) {
         availableRoutes.push(
           <Route key="users" path="/users">
             <Users />

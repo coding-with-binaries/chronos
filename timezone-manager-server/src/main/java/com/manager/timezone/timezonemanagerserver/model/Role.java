@@ -10,6 +10,14 @@ import javax.persistence.Table;
 public class Role extends BaseEntity {
     private RoleType type;
 
+    public Role() {
+
+    }
+
+    public Role(RoleType type) {
+        this.type = type;
+    }
+
     public RoleType getType() {
         return type;
     }

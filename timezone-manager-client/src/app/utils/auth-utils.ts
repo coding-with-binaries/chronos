@@ -1,11 +1,9 @@
 import { RoleType } from '../types/Auth';
 
-export function hasAdminRoles(roles: RoleType[]) {
-  return roles.includes(RoleType.admin);
+export function hasAdminRoles(role: RoleType) {
+  return role === RoleType.admin;
 }
 
-export function hasUserManagerRoles(roles: RoleType[]) {
-  return (
-    roles.includes(RoleType.admin) || roles.includes(RoleType.user_manager)
-  );
+export function hasUserManagerRoles(role: RoleType) {
+  return role === RoleType.admin || role === RoleType.user_manager;
 }

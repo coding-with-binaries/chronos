@@ -21,7 +21,7 @@ public interface UserService {
     AuthenticateUserResponseDto authenticateUser(AuthenticateUserRequestDto authenticateUserRequestDto);
 
     UserDto registerUser(RegisterUserRequestDto registerUserRequestDto)
-            throws UserExistsException, OperationForbiddenException, InvalidResourceException;
+            throws UserExistsException, OperationForbiddenException;
 
     List<UserDto> getAllUsers() throws OperationForbiddenException;
 

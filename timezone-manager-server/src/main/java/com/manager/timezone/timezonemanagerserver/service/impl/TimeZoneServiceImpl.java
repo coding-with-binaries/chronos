@@ -36,7 +36,7 @@ public class TimeZoneServiceImpl implements TimeZoneService {
     public List<TimeZoneDto> getAllAuthorizedTimeZones() {
         UserDto currentUser = userService.getCurrentAuthenticatedUser();
         if (currentUser != null) {
-            if (UserUtil.hasAdminAuthority(currentUser.getRoles())) {
+            if (UserUtil.hasAdminAuthority(currentUser.getRole())) {
                 return getAllTimeZones();
             }
             return TimeZoneUtil
@@ -49,7 +49,7 @@ public class TimeZoneServiceImpl implements TimeZoneService {
     public List<TimeZoneDto> getAllAuthorizedTimeZonesByName(String timeZoneName) {
         UserDto currentUser = userService.getCurrentAuthenticatedUser();
         if (currentUser != null) {
-            if (UserUtil.hasAdminAuthority(currentUser.getRoles())) {
+            if (UserUtil.hasAdminAuthority(currentUser.getRole())) {
                 return TimeZoneUtil.convertTimeZonesToDtoList(timeZoneRepository.findAllByTimeZoneName(timeZoneName));
             }
             return TimeZoneUtil.convertTimeZonesToDtoList(
@@ -77,10 +77,10 @@ public class TimeZoneServiceImpl implements TimeZoneService {
         }
         Optional<TimeZone> optionalTimeZone = timeZoneRepository.findById(timeZoneDto.getUid());
         if (optionalTimeZone.isPresent()) {
-            Set<RoleDto> roles = currentAuthenticatedUser.getRoles();
+            RoleDto role = currentAuthenticatedUser.getRole();
             TimeZone timeZone = optionalTimeZone.get();
             String owner = timeZone.getCreatedBy();
-            if (currentAuthenticatedUser.getUsername().equals(owner) || UserUtil.hasAdminAuthority(roles)) {
+            if (currentAuthenticatedUser.getUsername().equals(owner) || UserUtil.hasAdminAuthority(role)) {
                 if (!TimeZoneConstants.VALID_TIME_ZONE_OFFSETS.contains(timeZoneDto.getDifferenceFromGmt())) {
                     throw new InvalidResourceException(
                             "The time zone offset is not valid: " + timeZoneDto.getDifferenceFromGmt());
@@ -107,9 +107,9 @@ public class TimeZoneServiceImpl implements TimeZoneService {
         }
         Optional<TimeZone> optionalTimeZone = timeZoneRepository.findById(uid);
         if (optionalTimeZone.isPresent()) {
-            Set<RoleDto> roles = currentAuthenticatedUser.getRoles();
+            RoleDto role = currentAuthenticatedUser.getRole();
             String owner = optionalTimeZone.get().getCreatedBy();
-            if (currentAuthenticatedUser.getUsername().equals(owner) || UserUtil.hasAdminAuthority(roles)) {
+            if (currentAuthenticatedUser.getUsername().equals(owner) || UserUtil.hasAdminAuthority(role)) {
                 timeZoneRepository.delete(optionalTimeZone.get());
             } else {
                 throw new OperationForbiddenException("User: " + currentAuthenticatedUser.getUsername() +
