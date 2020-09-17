@@ -1,0 +1,30 @@
+#chronos-main,
+#chronos-main > #chronos-layout,
+#chronos-main #chronos-content {
+  height: 100%;
+}
+
+#chronos-main .ant-menu::before {
+  display: unset;
+}
+
+#chronos-main #chronos-content {
+  padding: 24px 50px;
+}
+
+#chronos-main #chronos-footer {
+  background: #e2e2e2;
+}
+
+#chronos-main .logo {
+  height: 32px;
+  background: rgba(255, 255, 255, 0.2);
+  margin: 16px;
+}
+
+#chronos-main .user-dropdown-menu {
+  cursor: pointer;
+  float: right;
+  color: white;
+  font-size: 14px;
+}
