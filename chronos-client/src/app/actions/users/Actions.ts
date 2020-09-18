@@ -1,16 +1,12 @@
 import { ErrorResponse } from '../../types/Common';
-import { RegisterUserDto, UpdateUserDto, User } from '../../types/Users';
+import { User } from '../../types/Users';
 import * as Actions from './ActionConstants';
 import {
   AddUser,
-  AddUserFailed,
-  AddUserSuccess,
   DeleteUser,
   DeleteUserFailed,
   DeleteUserSuccess,
   EditUser,
-  EditUserFailed,
-  EditUserSuccess,
   GetAllUsers,
   GetAllUsersFailed,
   GetAllUsersSuccess
@@ -32,35 +28,13 @@ export const getAllUsersSuccess = (users: User[]): GetAllUsersSuccess => ({
   payload: { users }
 });
 
-export const addUser = (user: RegisterUserDto): AddUser => ({
+export const addUser = (user: User): AddUser => ({
   type: Actions.ADD_USER,
   payload: { user }
 });
 
-export const addUserFailed = (errorResponse: ErrorResponse): AddUserFailed => ({
-  type: Actions.ADD_USER_FAILED,
-  payload: { errorResponse }
-});
-
-export const addUserSuccess = (user: User): AddUserSuccess => ({
-  type: Actions.ADD_USER_SUCCESS,
-  payload: { user }
-});
-
-export const editUser = (uid: string, user: UpdateUserDto): EditUser => ({
+export const editUser = (user: User): EditUser => ({
   type: Actions.EDIT_USER,
-  payload: { uid, user }
-});
-
-export const editUserFailed = (
-  errorResponse: ErrorResponse
-): EditUserFailed => ({
-  type: Actions.EDIT_USER_FAILED,
-  payload: { errorResponse }
-});
-
-export const editUserSuccess = (user: User): EditUserSuccess => ({
-  type: Actions.EDIT_USER_SUCCESS,
   payload: { user }
 });
 

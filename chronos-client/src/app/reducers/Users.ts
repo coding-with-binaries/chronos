@@ -14,8 +14,6 @@ const userReducer = (
   return produce<UsersStore, UsersStore>(state, draft => {
     switch (action.type) {
       case Actions.GET_ALL_USERS:
-      case Actions.ADD_USER:
-      case Actions.EDIT_USER:
       case Actions.DELETE_USER: {
         draft.error = undefined;
         draft.asyncState = AsyncState.Fetching;
@@ -23,8 +21,6 @@ const userReducer = (
       }
 
       case Actions.GET_ALL_USERS_FAILED:
-      case Actions.ADD_USER_FAILED:
-      case Actions.EDIT_USER_FAILED:
       case Actions.DELETE_USER_FAILED: {
         const { errorResponse } = action.payload;
         draft.error = errorResponse;
@@ -39,14 +35,14 @@ const userReducer = (
         break;
       }
 
-      case Actions.ADD_USER_SUCCESS: {
+      case Actions.ADD_USER: {
         const { user } = action.payload;
         draft.users.push(user);
         draft.asyncState = AsyncState.Completed;
         break;
       }
 
-      case Actions.EDIT_USER_SUCCESS: {
+      case Actions.EDIT_USER: {
         const { user } = action.payload;
         const index = draft.users.findIndex(t => t.uid === user.uid);
         draft.users.splice(index, 1, user);

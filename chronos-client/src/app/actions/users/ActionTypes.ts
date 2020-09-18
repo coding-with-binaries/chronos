@@ -1,5 +1,5 @@
 import { ErrorResponse } from '../../types/Common';
-import { RegisterUserDto, UpdateUserDto, User } from '../../types/Users';
+import { User } from '../../types/Users';
 import * as Actions from './ActionConstants';
 
 export interface GetAllUsers {
@@ -23,41 +23,12 @@ export interface GetAllUsersSuccess {
 export interface AddUser {
   type: Actions.ADD_USER;
   payload: {
-    user: RegisterUserDto;
-  };
-}
-
-export interface AddUserFailed {
-  type: Actions.ADD_USER_FAILED;
-  payload: {
-    errorResponse: ErrorResponse;
-  };
-}
-
-export interface AddUserSuccess {
-  type: Actions.ADD_USER_SUCCESS;
-  payload: {
     user: User;
   };
 }
 
 export interface EditUser {
   type: Actions.EDIT_USER;
-  payload: {
-    uid: string;
-    user: UpdateUserDto;
-  };
-}
-
-export interface EditUserFailed {
-  type: Actions.EDIT_USER_FAILED;
-  payload: {
-    errorResponse: ErrorResponse;
-  };
-}
-
-export interface EditUserSuccess {
-  type: Actions.EDIT_USER_SUCCESS;
   payload: {
     user: User;
   };
@@ -89,11 +60,7 @@ export type UserAction =
   | GetAllUsersFailed
   | GetAllUsersSuccess
   | AddUser
-  | AddUserFailed
-  | AddUserSuccess
   | EditUser
-  | EditUserFailed
-  | EditUserSuccess
   | DeleteUser
   | DeleteUserFailed
   | DeleteUserSuccess;

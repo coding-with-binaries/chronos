@@ -1,4 +1,4 @@
-import { Form, Input, Modal, Select } from 'antd';
+import { Alert, Form, Input, Modal, Select } from 'antd';
 import React, { useCallback, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Dispatch } from 'redux';
@@ -9,6 +9,7 @@ import { USERNAME_REGEX } from '../../constants/Regex';
 import { ROLE_MAPPING } from '../../constants/Roles';
 import { StoreState } from '../../types';
 import { AuthStore, RoleType } from '../../types/Auth';
+import { AsyncState, ErrorResponse } from '../../types/Common';
 import { RegisterUserDto, UpdateUserDto, User } from '../../types/Users';
 import { hasAdminRoles } from '../../utils/auth-utils';
 
@@ -46,6 +47,11 @@ const UpdateUserModal: React.FC<Props> = props => {
     getUser();
   }, [getUser]);
 
+  const [asyncState, setAsyncState] = useState<AsyncState>(
+    AsyncState.NotStarted
+  );
+  const [errorResponse, setErrorResponse] = useState<ErrorResponse>();
+
   const onSubmit = async () => {
     try {
       const formValues = await form.validateFields();
@@ -55,16 +61,33 @@ const UpdateUserModal: React.FC<Props> = props => {
           password: formValues.password,
           role: formValues.role
         };
-        dispatch(addUser(registerUserDto));
-        form.resetFields();
-        onDismiss();
+        try {
+          setAsyncState(AsyncState.Fetching);
+          const user = await UserApi.registerUser(registerUserDto);
+          dispatch(addUser(user));
+          form.resetFields();
+          onDismiss();
+          setAsyncState(AsyncState.Completed);
+        } catch (e) {
+          setErrorResponse(e.response.data);
+          setAsyncState(AsyncState.Failed);
+        }
       } else if (mode === 'EDIT' && !!uid) {
         const updateUserDto: UpdateUserDto = {
           password: formValues.password,
           role: formValues.role
         };
-        dispatch(editUser(uid, updateUserDto));
-        onDismiss();
+        try {
+          setAsyncState(AsyncState.Fetching);
+          const user = await UserApi.updateUser(uid, updateUserDto);
+          dispatch(editUser(user));
+          form.resetFields();
+          onDismiss();
+          setAsyncState(AsyncState.Completed);
+        } catch (e) {
+          setErrorResponse(e.response.data);
+          setAsyncState(AsyncState.Failed);
+        }
       }
     } catch (e) {
       console.error('Error while updating user: ', e);
@@ -86,6 +109,17 @@ const UpdateUserModal: React.FC<Props> = props => {
       onOk={onSubmit}
       width={800}
     >
+      {asyncState === AsyncState.Failed && (
+        <Alert
+          type="error"
+          message={
+            errorResponse
+              ? errorResponse.message
+              : 'Something went wrong!. Please check your connectivity and try again'
+          }
+          style={{ marginBottom: '16px' }}
+        />
+      )}
       <Form form={form} layout="vertical" initialValues={initialValues}>
         <Form.Item
           name="username"

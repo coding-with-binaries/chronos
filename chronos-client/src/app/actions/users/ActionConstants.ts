@@ -10,20 +10,8 @@ export type GET_ALL_USERS_SUCCESS = typeof GET_ALL_USERS_SUCCESS;
 export const ADD_USER = 'ADD_USER';
 export type ADD_USER = typeof ADD_USER;
 
-export const ADD_USER_FAILED = 'ADD_USER_FAILED';
-export type ADD_USER_FAILED = typeof ADD_USER_FAILED;
-
-export const ADD_USER_SUCCESS = 'ADD_USER_SUCCESS';
-export type ADD_USER_SUCCESS = typeof ADD_USER_SUCCESS;
-
 export const EDIT_USER = 'EDIT_USER';
 export type EDIT_USER = typeof EDIT_USER;
-
-export const EDIT_USER_FAILED = 'EDIT_USER_FAILED';
-export type EDIT_USER_FAILED = typeof EDIT_USER_FAILED;
-
-export const EDIT_USER_SUCCESS = 'EDIT_USER_SUCCESS';
-export type EDIT_USER_SUCCESS = typeof EDIT_USER_SUCCESS;
 
 export const DELETE_USER = 'DELETE_USER';
 export type DELETE_USER = typeof DELETE_USER;

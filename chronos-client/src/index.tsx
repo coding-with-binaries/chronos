@@ -1,28 +1,13 @@
-import { ConnectedRouter, routerMiddleware } from 'connected-react-router';
-import { createBrowserHistory } from 'history';
+import { ConnectedRouter } from 'connected-react-router';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { Provider } from 'react-redux';
-import { applyMiddleware, createStore } from 'redux';
-import { composeWithDevTools } from 'redux-devtools-extension';
-import createSagaMiddleware from 'redux-saga';
 import App from './app';
-import createRootReducer from './app/reducers';
-import rootSaga from './app/sagas';
 import './index.css';
 import * as serviceWorker from './serviceWorker';
+import configureStore from './store';
 
-const history = createBrowserHistory();
-const sagaMiddleware = createSagaMiddleware();
-
-const store = createStore(
-  createRootReducer(history),
-  composeWithDevTools(
-    applyMiddleware(routerMiddleware(history), sagaMiddleware)
-  )
-);
-
-sagaMiddleware.run(rootSaga);
+const { store, history } = configureStore();
 
 ReactDOM.render(
   <React.StrictMode>
