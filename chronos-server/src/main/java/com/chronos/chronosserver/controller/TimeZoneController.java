@@ -84,7 +84,7 @@ public class TimeZoneController {
             timeZoneDto.setUid(UUID.fromString(uid));
             TimeZoneDto updatedTimeZoneDto = timeZoneService.updateTimeZone(timeZoneDto);
             return new ResponseEntity<>(updatedTimeZoneDto, HttpStatus.OK);
-        } catch (InvalidResourceException e) {
+        } catch (InvalidResourceException | IllegalArgumentException e) {
             ErrorResponseDto errorResponseDto = new ErrorResponseDto(HttpStatus.BAD_REQUEST, e.getMessage());
             return new ResponseEntity<>(errorResponseDto, HttpStatus.BAD_REQUEST);
         } catch (OperationForbiddenException e) {
@@ -102,6 +102,7 @@ public class TimeZoneController {
     @ApiOperation(value = "Delete time zone")
     @ApiResponses(value = {
             @ApiResponse(code = 204, message = "No Content"),
+            @ApiResponse(code = 400, message = "Bad Request", response = ErrorResponseDto.class),
             @ApiResponse(code = 401, message = "Unauthorized", response = ErrorResponseDto.class),
             @ApiResponse(code = 404, message = "Not Found", response = ErrorResponseDto.class),
             @ApiResponse(code = 500, message = "Internal Server Error", response = ErrorResponseDto.class)
@@ -111,6 +112,9 @@ public class TimeZoneController {
         try {
             timeZoneService.deleteTimeZone(UUID.fromString(uid));
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        } catch (IllegalArgumentException e) {
+            ErrorResponseDto errorResponseDto = new ErrorResponseDto(HttpStatus.BAD_REQUEST, e.getMessage());
+            return new ResponseEntity<>(errorResponseDto, HttpStatus.BAD_REQUEST);
         } catch (OperationForbiddenException e) {
             ErrorResponseDto errorResponseDto = new ErrorResponseDto(HttpStatus.UNAUTHORIZED, e.getMessage());
             return new ResponseEntity<>(errorResponseDto, HttpStatus.UNAUTHORIZED);

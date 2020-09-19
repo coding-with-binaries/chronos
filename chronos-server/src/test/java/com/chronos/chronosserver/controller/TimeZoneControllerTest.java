@@ -197,7 +197,8 @@ public class TimeZoneControllerTest {
     }
 
     @Test
-    public void test_deleteTimeZone_Success204NoContent() throws ResourceNotFoundException, OperationForbiddenException {
+    public void test_deleteTimeZone_Success204NoContent()
+            throws ResourceNotFoundException, OperationForbiddenException {
         UUID uid = UUID.randomUUID();
 
         PowerMockito.doNothing().when(timeZoneService).deleteTimeZone(uid);
@@ -208,7 +209,18 @@ public class TimeZoneControllerTest {
     }
 
     @Test
-    public void test_deleteTimeZone_Failed401Unauthorized() throws ResourceNotFoundException, OperationForbiddenException {
+    public void test_deleteTimeZone_Failed400BadRequest() {
+        String uid = "invalid-uid";
+
+        var response = timeZoneController.deleteTimeZone(uid);
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        assertTrue(response.getBody() instanceof ErrorResponseDto);
+        assertEquals(400, ((ErrorResponseDto) response.getBody()).getStatusCode());
+    }
+
+    @Test
+    public void test_deleteTimeZone_Failed401Unauthorized()
+            throws ResourceNotFoundException, OperationForbiddenException {
         UUID uid = UUID.randomUUID();
 
         PowerMockito.doThrow(new OperationForbiddenException()).when(timeZoneService).deleteTimeZone(uid);
@@ -234,7 +246,8 @@ public class TimeZoneControllerTest {
     }
 
     @Test
-    public void test_deleteTimeZone_Failed500InternalServerError() throws ResourceNotFoundException, OperationForbiddenException {
+    public void test_deleteTimeZone_Failed500InternalServerError()
+            throws ResourceNotFoundException, OperationForbiddenException {
         UUID uid = UUID.randomUUID();
 
         PowerMockito.doThrow(new RuntimeException()).when(timeZoneService).deleteTimeZone(uid);

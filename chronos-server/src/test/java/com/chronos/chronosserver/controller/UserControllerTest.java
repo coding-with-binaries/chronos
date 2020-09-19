@@ -12,6 +12,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.powermock.api.mockito.PowerMockito;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.Collections;
@@ -79,6 +80,18 @@ public class UserControllerTest {
         var response = userController.getUser(uid);
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(updatedUser, response.getBody());
+    }
+
+    @Test
+    public void test_getUser_Failed400BadRequest() throws OperationForbiddenException {
+        String uid = "invalid-uid";
+        UserDto updatedUser = new UserDto();
+        updatedUser.setUsername(USERNAME);
+
+        var response = userController.getUser(uid);
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        assertTrue(response.getBody() instanceof ErrorResponseDto);
+        assertEquals(400, ((ErrorResponseDto) response.getBody()).getStatusCode());
     }
 
     @Test
@@ -171,6 +184,18 @@ public class UserControllerTest {
         var response = userController.authenticateUser(requestDto);
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(responseDto, response.getBody());
+    }
+
+    @Test
+    public void test_authenticateUser_Failed401Unauthorized() {
+        AuthenticateUserRequestDto requestDto = new AuthenticateUserRequestDto();
+        requestDto.setUsername(USERNAME);
+        PowerMockito.when(userService.authenticateUser(requestDto)).thenThrow(BadCredentialsException.class);
+
+        var response = userController.authenticateUser(requestDto);
+        assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
+        assertTrue(response.getBody() instanceof ErrorResponseDto);
+        assertEquals(401, ((ErrorResponseDto) response.getBody()).getStatusCode());
     }
 
     @Test
@@ -317,6 +342,17 @@ public class UserControllerTest {
     }
 
     @Test
+    public void test_updateUserPassword_Failed400BadRequest() {
+        String uid = "invalid-uid";
+        UpdatePasswordDto updatePasswordDto = new UpdatePasswordDto();
+
+        var response = userController.updateUserPassword(uid, updatePasswordDto);
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        assertTrue(response.getBody() instanceof ErrorResponseDto);
+        assertEquals(400, ((ErrorResponseDto) response.getBody()).getStatusCode());
+    }
+
+    @Test
     public void test_updateUserPassword_Failed401Unauthorized()
             throws ResourceNotFoundException, OperationForbiddenException {
         UUID uid = UUID.randomUUID();
@@ -368,6 +404,15 @@ public class UserControllerTest {
         assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
     }
 
+    @Test
+    public void test_deleteUser_Failed400BadRequest() {
+        String uid = "invalid-uid";
+
+        var response = userController.deleteUser(uid);
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        assertTrue(response.getBody() instanceof ErrorResponseDto);
+        assertEquals(400, ((ErrorResponseDto) response.getBody()).getStatusCode());
+    }
 
     @Test
     public void test_deleteUser_Failed401Unauthorized() throws ResourceNotFoundException, OperationForbiddenException {

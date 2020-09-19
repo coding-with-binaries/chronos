@@ -14,6 +14,7 @@ import io.swagger.annotations.ApiResponses;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -51,6 +52,7 @@ public class UserController {
     @ApiOperation(value = "Get user")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK", response = UserDto.class),
+            @ApiResponse(code = 400, message = "Bad Request", response = ErrorResponseDto.class),
             @ApiResponse(code = 401, message = "Unauthorized", response = ErrorResponseDto.class),
             @ApiResponse(code = 404, message = "Not Found", response = ErrorResponseDto.class),
             @ApiResponse(code = 500, message = "Internal Server Error", response = ErrorResponseDto.class)
@@ -60,6 +62,9 @@ public class UserController {
         try {
             UserDto updatedUser = userService.getUser(UUID.fromString(uid));
             return new ResponseEntity<>(updatedUser, HttpStatus.OK);
+        } catch (IllegalArgumentException e) {
+            ErrorResponseDto errorResponseDto = new ErrorResponseDto(HttpStatus.BAD_REQUEST, e.getMessage());
+            return new ResponseEntity<>(errorResponseDto, HttpStatus.BAD_REQUEST);
         } catch (OperationForbiddenException e) {
             ErrorResponseDto errorResponseDto = new ErrorResponseDto(HttpStatus.UNAUTHORIZED, e.getMessage());
             return new ResponseEntity<>(errorResponseDto, HttpStatus.UNAUTHORIZED);
@@ -97,6 +102,7 @@ public class UserController {
     @ApiOperation(value = "Authenticate user")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK", response = AuthenticateUserResponseDto.class),
+            @ApiResponse(code = 401, message = "Unauthorized", response = ErrorResponseDto.class),
             @ApiResponse(code = 500, message = "Internal Server Error", response = ErrorResponseDto.class)
     })
     @PostMapping(value = ServerUri.SIGN_IN_URI)
@@ -105,6 +111,9 @@ public class UserController {
             requestDto.setUsername(requestDto.getUsername().toLowerCase());
             AuthenticateUserResponseDto responseDto = userService.authenticateUser(requestDto);
             return new ResponseEntity<>(responseDto, HttpStatus.OK);
+        } catch (BadCredentialsException e) {
+            ErrorResponseDto errorResponseDto = new ErrorResponseDto(HttpStatus.UNAUTHORIZED, e.getMessage());
+            return new ResponseEntity<>(errorResponseDto, HttpStatus.UNAUTHORIZED);
         } catch (Exception e) {
             ErrorResponseDto errorResponseDto = new ErrorResponseDto(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
             return new ResponseEntity<>(errorResponseDto, HttpStatus.INTERNAL_SERVER_ERROR);
@@ -157,7 +166,7 @@ public class UserController {
         } catch (ResourceNotFoundException e) {
             ErrorResponseDto errorResponseDto = new ErrorResponseDto(HttpStatus.NOT_FOUND, e.getMessage());
             return new ResponseEntity<>(errorResponseDto, HttpStatus.NOT_FOUND);
-        } catch (InvalidResourceException e) {
+        } catch (InvalidResourceException | IllegalArgumentException e) {
             ErrorResponseDto errorResponseDto = new ErrorResponseDto(HttpStatus.BAD_REQUEST, e.getMessage());
             return new ResponseEntity<>(errorResponseDto, HttpStatus.BAD_REQUEST);
         } catch (Exception e) {
@@ -180,6 +189,9 @@ public class UserController {
         try {
             userService.updateUserPassword(UUID.fromString(uid), updatePasswordDto);
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        } catch (IllegalArgumentException e) {
+            ErrorResponseDto errorResponseDto = new ErrorResponseDto(HttpStatus.BAD_REQUEST, e.getMessage());
+            return new ResponseEntity<>(errorResponseDto, HttpStatus.BAD_REQUEST);
         } catch (OperationForbiddenException e) {
             ErrorResponseDto errorResponseDto = new ErrorResponseDto(HttpStatus.UNAUTHORIZED, e.getMessage());
             return new ResponseEntity<>(errorResponseDto, HttpStatus.UNAUTHORIZED);
@@ -204,6 +216,9 @@ public class UserController {
         try {
             userService.deleteUser(UUID.fromString(uid));
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        } catch (IllegalArgumentException e) {
+            ErrorResponseDto errorResponseDto = new ErrorResponseDto(HttpStatus.BAD_REQUEST, e.getMessage());
+            return new ResponseEntity<>(errorResponseDto, HttpStatus.BAD_REQUEST);
         } catch (OperationForbiddenException e) {
             ErrorResponseDto errorResponseDto = new ErrorResponseDto(HttpStatus.UNAUTHORIZED, e.getMessage());
             return new ResponseEntity<>(errorResponseDto, HttpStatus.UNAUTHORIZED);
