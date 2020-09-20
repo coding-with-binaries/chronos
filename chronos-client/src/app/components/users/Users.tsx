@@ -174,15 +174,22 @@ const Users: React.FC = () => {
             title="Edit"
             icon={<EditOutlined />}
             type="link"
+            disabled={user.username === 'administrator'}
             onClick={showEditUserModal(user)}
           />
           <Popconfirm
             title="This action cannot be reverted! Want to proceed?"
             okText="Delete"
+            disabled={user.username === 'administrator'}
             okButtonProps={{ danger: true }}
             onConfirm={onConfirmDelete(uid)}
           >
-            <Button title="Delete" icon={<DeleteOutlined />} type="link" />
+            <Button
+              title="Delete"
+              icon={<DeleteOutlined />}
+              disabled={user.username === 'administrator'}
+              type="link"
+            />
           </Popconfirm>
         </Space>
       )

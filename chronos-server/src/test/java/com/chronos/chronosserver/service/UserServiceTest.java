@@ -1,6 +1,7 @@
 package com.chronos.chronosserver.service;
 
 import com.chronos.chronosserver.auth.AuthUserDetails;
+import com.chronos.chronosserver.constants.ChronosConstants;
 import com.chronos.chronosserver.dto.*;
 import com.chronos.chronosserver.exception.InvalidResourceException;
 import com.chronos.chronosserver.exception.UserExistsException;
@@ -288,6 +289,18 @@ public class UserServiceTest {
     }
 
     @Test(expected = OperationForbiddenException.class)
+    public void test_updateUser_Administrator_Forbidden()
+            throws OperationForbiddenException, ResourceNotFoundException, InvalidResourceException {
+        User administrator = new User();
+        administrator.setUsername(ChronosConstants.ADMINISTRATOR);
+        UUID uid = administrator.getUid();
+        UpdateUserRequestDto requestDto = new UpdateUserRequestDto();
+        requestDto.setRole(RoleType.admin);
+        PowerMockito.when(userRepository.findById(uid)).thenReturn(Optional.of(administrator));
+        userService.updateUser(uid, requestDto);
+    }
+
+    @Test(expected = OperationForbiddenException.class)
     public void test_updateUser_WithUserManager_Forbidden()
             throws OperationForbiddenException, ResourceNotFoundException, InvalidResourceException {
         initializeAuthenticatedUserManager();
@@ -389,6 +402,16 @@ public class UserServiceTest {
         PowerMockito.when(userRepository.findById(uid)).thenReturn(Optional.of(userManager));
         userService.deleteUser(uid);
 
+        verify(userRepository, times(1)).delete(any());
+    }
+
+    @Test(expected = OperationForbiddenException.class)
+    public void test_deleteUser_Administrator_Forbidden() throws OperationForbiddenException, ResourceNotFoundException {
+        User administrator = new User();
+        administrator.setUsername(ChronosConstants.ADMINISTRATOR);
+        UUID uid = administrator.getUid();
+        PowerMockito.when(userRepository.findById(uid)).thenReturn(Optional.of(administrator));
+        userService.deleteUser(uid);
         verify(userRepository, times(1)).delete(any());
     }
 

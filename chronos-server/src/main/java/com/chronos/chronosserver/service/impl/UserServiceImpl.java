@@ -1,6 +1,7 @@
 package com.chronos.chronosserver.service.impl;
 
 import com.chronos.chronosserver.auth.AuthUserDetails;
+import com.chronos.chronosserver.constants.ChronosConstants;
 import com.chronos.chronosserver.dto.*;
 import com.chronos.chronosserver.exception.InvalidResourceException;
 import com.chronos.chronosserver.exception.UserExistsException;
@@ -181,6 +182,9 @@ public class UserServiceImpl implements UserService {
             RoleDto currentAuthenticatedUserRole = currentAuthenticatedUser.getRole();
             User user = optionalUser.get();
             String username = user.getUsername();
+            if (username.equals(ChronosConstants.ADMINISTRATOR)) {
+                throw new OperationForbiddenException("Administrator cannot be modified!");
+            }
             if (currentAuthenticatedUser.getUsername().equals(username) ||
                     UserUtil.hasAdminAuthority(currentAuthenticatedUserRole) ||
                     (UserUtil.hasUserManagementAuthority(currentAuthenticatedUserRole) &&
@@ -243,6 +247,9 @@ public class UserServiceImpl implements UserService {
             RoleDto currentAuthenticatedUserRole = currentAuthenticatedUser.getRole();
             User user = optionalUser.get();
             String username = user.getUsername();
+            if (username.equals(ChronosConstants.ADMINISTRATOR)) {
+                throw new OperationForbiddenException("Administrator cannot be deleted!");
+            }
             if (currentAuthenticatedUser.getUsername().equals(username) ||
                     UserUtil.hasAdminAuthority(currentAuthenticatedUserRole) ||
                     (UserUtil.hasUserManagementAuthority(currentAuthenticatedUserRole) &&
