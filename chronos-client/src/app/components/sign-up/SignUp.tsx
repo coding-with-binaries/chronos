@@ -29,7 +29,7 @@ const SignIn: React.FC = () => {
   return (
     <div id="chronos-signup">
       <div id="signup-container">
-        {error && error.statusCode !== 401 && (
+        {error && (
           <Alert
             message={
               error.message ||

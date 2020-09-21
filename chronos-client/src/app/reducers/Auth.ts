@@ -20,10 +20,14 @@ const authReducer = (
       }
 
       case Actions.AUTHENTICATE_USER_FAILED:
-      case Actions.REGISTER_USER_FAILED:
-      case Actions.GET_CURRENT_USER_FAILED: {
+      case Actions.REGISTER_USER_FAILED: {
         const { errorResponse } = action.payload;
         draft.error = errorResponse;
+        draft.asyncState = AsyncState.Failed;
+        break;
+      }
+
+      case Actions.GET_CURRENT_USER_FAILED: {
         draft.asyncState = AsyncState.Failed;
         break;
       }
