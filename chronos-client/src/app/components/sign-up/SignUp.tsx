@@ -12,9 +12,7 @@ import { AuthRequestDto, AuthStore } from '../../types/Auth';
 import './SignUp.css';
 
 const SignIn: React.FC = () => {
-  const { authUser, error } = useSelector<StoreState, AuthStore>(
-    s => s.authStore
-  );
+  const { authUser } = useSelector<StoreState, AuthStore>(s => s.authStore);
 
   const dispatch = useDispatch<Dispatch<AuthAction>>();
 
@@ -29,17 +27,13 @@ const SignIn: React.FC = () => {
   return (
     <div id="chronos-signup">
       <div id="signup-container">
-        {error && (
-          <Alert
-            message={
-              error.message ||
-              'Something went wrong! Please check your connection and try again!'
-            }
-            type="error"
-            showIcon
-            closable
-          />
-        )}
+        <Alert
+          style={{ marginBottom: '6px' }}
+          message="Since this is demo serverless version there wont be any actual registration!"
+          type="info"
+          showIcon
+          closable
+        />
         <h2>Sign up to Chronos</h2>
         <Form
           name="normal_signup"

@@ -1,16 +1,16 @@
 import { Alert, Form, Input, Modal, Select } from 'antd';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Dispatch } from 'redux';
+import { v4 as uuid } from 'uuid';
 import { addUser, editUser } from '../../actions/users/Actions';
 import { UserAction } from '../../actions/users/ActionTypes';
-import UserApi from '../../api/user/User';
 import { USERNAME_REGEX } from '../../constants/Regex';
 import { ROLE_MAPPING } from '../../constants/Roles';
 import { StoreState } from '../../types';
 import { AuthStore, RoleType } from '../../types/Auth';
 import { AsyncState, ErrorResponse } from '../../types/Common';
-import { RegisterUserDto, UpdateUserDto, User } from '../../types/Users';
+import { RegisterUserDto, User, UsersStore } from '../../types/Users';
 import { hasAdminRoles } from '../../utils/auth-utils';
 
 interface Props {
@@ -24,28 +24,18 @@ interface Props {
 const UpdateUserModal: React.FC<Props> = props => {
   const { visible, uid, mode, initialValues, onDismiss } = props;
   const { authUser } = useSelector<StoreState, AuthStore>(s => s.authStore);
+  const { users } = useSelector<StoreState, UsersStore>(s => s.usersStore);
   const dispatch = useDispatch<Dispatch<UserAction>>();
 
   const [form] = Form.useForm();
 
-  const [user, setUser] = useState<User>();
+  const user = users.find(u => u.uid === uid);
 
   useEffect(() => {
     if (mode === 'EDIT' && user) {
       form.setFieldsValue({ username: user.username });
     }
   }, [mode, user, form]);
-
-  const getUser = useCallback(async () => {
-    if (uid) {
-      const res = await UserApi.getUser(uid);
-      setUser(res);
-    }
-  }, [uid]);
-
-  useEffect(() => {
-    getUser();
-  }, [getUser]);
 
   const [asyncState, setAsyncState] = useState<AsyncState>(
     AsyncState.NotStarted
@@ -56,31 +46,58 @@ const UpdateUserModal: React.FC<Props> = props => {
     try {
       const formValues = await form.validateFields();
       if (mode === 'ADD') {
-        const registerUserDto: RegisterUserDto = {
-          username: formValues.username,
-          password: formValues.password,
-          role: formValues.role
-        };
         try {
           setAsyncState(AsyncState.Fetching);
-          const user = await UserApi.registerUser(registerUserDto);
-          dispatch(addUser(user));
-          form.resetFields();
-          onDismiss();
-          setAsyncState(AsyncState.Completed);
+          const userExist = !!users.find(
+            u => u.username === formValues.username
+          );
+          if (userExist) {
+            setErrorResponse({
+              message: `User already exists with username: ${formValues.username}`,
+              status: 'CONFLICT',
+              statusCode: 409
+            });
+            setAsyncState(AsyncState.Failed);
+          } else {
+            const user: User = {
+              createdBy: authUser?.username || '-',
+              enabled: true,
+              lastModifiedBy: authUser?.username || '-',
+              role: {
+                createdBy: 'administrator',
+                lastModifiedBy: 'administrator',
+                type: formValues.role,
+                uid: uuid()
+              },
+              uid: uuid(),
+              username: formValues.username
+            };
+            dispatch(addUser(user));
+            form.resetFields();
+            onDismiss();
+            setAsyncState(AsyncState.Completed);
+          }
         } catch (e) {
           setErrorResponse(e.response.data);
           setAsyncState(AsyncState.Failed);
         }
       } else if (mode === 'EDIT' && !!uid) {
-        const updateUserDto: UpdateUserDto = {
-          password: formValues.password,
-          role: formValues.role
-        };
         try {
           setAsyncState(AsyncState.Fetching);
-          const user = await UserApi.updateUser(uid, updateUserDto);
-          dispatch(editUser(user));
+          const updatedUser: User = {
+            createdBy: user?.createdBy || '-',
+            enabled: true,
+            lastModifiedBy: authUser?.username || '-',
+            role: {
+              createdBy: 'administrator',
+              lastModifiedBy: 'administrator',
+              type: formValues.role,
+              uid: uuid()
+            },
+            uid,
+            username: user?.username || '-'
+          };
+          dispatch(editUser(updatedUser));
           form.resetFields();
           onDismiss();
           setAsyncState(AsyncState.Completed);

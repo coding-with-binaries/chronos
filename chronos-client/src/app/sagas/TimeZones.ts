@@ -1,4 +1,5 @@
-import { all, call, put, takeLatest } from 'redux-saga/effects';
+import { all, put, select, takeLatest } from 'redux-saga/effects';
+import { v4 as uuid } from 'uuid';
 import * as Actions from '../actions/time-zones/ActionConstants';
 import {
   addTimeZoneFailed,
@@ -16,13 +17,14 @@ import {
   EditTimeZone,
   GetAllTimeZones
 } from '../actions/time-zones/ActionTypes';
-import TimeZoneApi from '../api/time-zone/TimeZone';
+import { mockTimeZones } from '../mocks/TimeZones';
+import { StoreState } from '../types';
 import { ErrorResponse } from '../types/Common';
 import { TimeZone } from '../types/TimeZones';
 
-function* getAllTimeZonesSaga(action: GetAllTimeZones) {
+function* getAllTimeZonesSaga(_: GetAllTimeZones) {
   try {
-    const timeZones: TimeZone[] = yield call(TimeZoneApi.getAllTimeZones);
+    const timeZones: TimeZone[] = mockTimeZones;
     yield put(getAllTimeZonesSuccess(timeZones));
   } catch (e) {
     const errorResponse: ErrorResponse = e.response.data;
@@ -35,11 +37,21 @@ function* watchForGetAllTimeZones() {
 }
 
 function* addTimeZoneSaga(action: AddTimeZone) {
+  const username = yield select(
+    (s: StoreState) => s.authStore.authUser?.username
+  );
   try {
-    const timeZone: TimeZone = yield call(
-      TimeZoneApi.addTimeZone,
-      action.payload.timeZone
-    );
+    const {
+      timeZone: { timeZoneName, locationName, differenceFromGmt }
+    } = action.payload;
+    const timeZone: TimeZone = {
+      differenceFromGmt,
+      locationName,
+      timeZoneName,
+      createdBy: username,
+      lastModifiedBy: username,
+      uid: uuid()
+    };
     yield put(addTimeZoneSuccess(timeZone));
   } catch (e) {
     const errorResponse: ErrorResponse = e.response.data;
@@ -53,12 +65,25 @@ function* watchForAddTimeZone() {
 
 function* editTimeZoneSaga(action: EditTimeZone) {
   try {
-    const { uid, timeZone } = action.payload;
-    const updatedTimeZone: TimeZone = yield call(
-      TimeZoneApi.editTimeZone,
+    const {
       uid,
-      timeZone
+      timeZone: { differenceFromGmt, locationName, timeZoneName }
+    } = action.payload;
+    const timeZones: TimeZone[] = yield select(
+      (s: StoreState) => s.timeZonesStore.timeZones
     );
+    const currentTimeZone = timeZones.find(t => t.uid === uid);
+    const username = yield select(
+      (s: StoreState) => s.authStore.authUser?.username
+    );
+    const updatedTimeZone: TimeZone = {
+      createdBy: currentTimeZone?.createdBy || '-',
+      differenceFromGmt,
+      timeZoneName,
+      locationName,
+      uid,
+      lastModifiedBy: username
+    };
     yield put(editTimeZoneSuccess(updatedTimeZone));
   } catch (e) {
     const errorResponse: ErrorResponse = e.response.data;
@@ -73,7 +98,6 @@ function* watchForEditTimeZone() {
 function* deleteTimeZoneSaga(action: DeleteTimeZone) {
   try {
     const { uid } = action.payload;
-    yield call(TimeZoneApi.deleteTimeZone, uid);
     yield put(deleteTimeZoneSuccess(uid));
   } catch (e) {
     const errorResponse: ErrorResponse = e.response.data;

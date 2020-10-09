@@ -1,5 +1,6 @@
 import { push } from 'connected-react-router';
 import { all, call, put, takeLatest } from 'redux-saga/effects';
+import { v4 as uuid } from 'uuid';
 import * as Actions from '../actions/auth/ActionConstants';
 import {
   authenticateUserFailed,
@@ -13,7 +14,6 @@ import { AuthenticateUser, SignOutUser } from '../actions/auth/ActionTypes';
 import UserApi from '../api/user/User';
 import { AuthResponseDto, AuthUser, RoleType } from '../types/Auth';
 import { ErrorResponse } from '../types/Common';
-import { RegisterUserDto } from '../types/Users';
 import {
   clearAuthorizationToken,
   setAuthorizationToken
@@ -36,10 +36,12 @@ function* watchForGetCurrentUser() {
 
 function* authenticateUserSaga(action: AuthenticateUser) {
   try {
-    const { accessToken, uid, username, role }: AuthResponseDto = yield call(
-      UserApi.authenticateUser,
-      action.payload.authRequestDto
-    );
+    const { accessToken, uid, username, role }: AuthResponseDto = {
+      accessToken: uuid(),
+      role: RoleType.admin,
+      uid: uuid(),
+      username: action.payload.authRequestDto.username
+    };
     setAuthorizationToken(accessToken);
     const authUser: AuthUser = { uid, username, role };
     yield put(authenticateUserSuccess(accessToken, authUser));
@@ -55,13 +57,8 @@ function* watchForUserAuthentication() {
   yield takeLatest(Actions.AUTHENTICATE_USER, authenticateUserSaga);
 }
 
-function* registerUserSaga(action: AuthenticateUser) {
+function* registerUserSaga(_: AuthenticateUser) {
   try {
-    const registerUserDto: RegisterUserDto = {
-      ...action.payload.authRequestDto,
-      role: RoleType.user
-    };
-    yield call(UserApi.registerUser, registerUserDto);
     yield put(registerUserSuccess());
     yield put(push('/sign-in?registered=true'));
   } catch (e) {

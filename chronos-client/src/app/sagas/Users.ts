@@ -1,4 +1,4 @@
-import { all, call, put, takeLatest } from 'redux-saga/effects';
+import { all, put, takeLatest } from 'redux-saga/effects';
 import * as Actions from '../actions/users/ActionConstants';
 import {
   deleteUserFailed,
@@ -7,13 +7,13 @@ import {
   getAllUsersSuccess
 } from '../actions/users/Actions';
 import { DeleteUser, GetAllUsers } from '../actions/users/ActionTypes';
-import UserApi from '../api/user/User';
+import { mockUsers } from '../mocks/Users';
 import { ErrorResponse } from '../types/Common';
 import { User } from '../types/Users';
 
-function* getAllUsersSaga(action: GetAllUsers) {
+function* getAllUsersSaga(_: GetAllUsers) {
   try {
-    const users: User[] = yield call(UserApi.getAllUsers);
+    const users: User[] = mockUsers;
     yield put(getAllUsersSuccess(users));
   } catch (e) {
     const errorResponse: ErrorResponse = e.response.data;
@@ -28,7 +28,6 @@ function* watchForGetAllUsers() {
 function* deleteUserSaga(action: DeleteUser) {
   try {
     const { uid } = action.payload;
-    yield call(UserApi.deleteUser, uid);
     yield put(deleteUserSuccess(uid));
   } catch (e) {
     const errorResponse: ErrorResponse = e.response.data;

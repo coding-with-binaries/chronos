@@ -4,7 +4,6 @@ import { useDispatch, useSelector } from 'react-redux';
 import { Dispatch } from 'redux';
 import { signOutUser } from '../../actions/auth/Actions';
 import { AuthAction } from '../../actions/auth/ActionTypes';
-import UserApi from '../../api/user/User';
 import { StoreState } from '../../types';
 import { AuthStore, UpdatePasswordDto } from '../../types/Auth';
 import { ErrorResponse } from '../../types/Common';
@@ -16,11 +15,10 @@ const Settings: React.FC = props => {
 
   const [error, setError] = useState<ErrorResponse>();
 
-  const onFinish = async (updatePasswordDto: UpdatePasswordDto) => {
+  const onFinish = async (_: UpdatePasswordDto) => {
     try {
       setError(undefined);
       if (authUser) {
-        await UserApi.updateUserPassword(authUser.uid, updatePasswordDto);
         dispatch(signOutUser());
       }
     } catch (e) {

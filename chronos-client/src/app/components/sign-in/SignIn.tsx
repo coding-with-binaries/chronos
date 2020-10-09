@@ -10,14 +10,14 @@ import { StoreState } from '../../types';
 import { AuthRequestDto, AuthStore } from '../../types/Auth';
 import './SignIn.css';
 
+const SERVERLESS_MESSAGE =
+  'Since this is demo serverless version any username/password will work! Logged in user will have admin priviledges to perform any operation!';
 const SignIn: React.FC = () => {
   const { search } = useLocation();
   const history = useHistory();
   const isRegistered = search === '?registered=true';
 
-  const { authUser, error } = useSelector<StoreState, AuthStore>(
-    s => s.authStore
-  );
+  const { authUser } = useSelector<StoreState, AuthStore>(s => s.authStore);
 
   const dispatch = useDispatch<Dispatch<AuthAction>>();
 
@@ -37,19 +37,16 @@ const SignIn: React.FC = () => {
   return (
     <div id="chronos-signin">
       <div id="signin-container">
-        {error && (
-          <Alert
-            message={
-              error.message ||
-              'Something went wrong! Please check your connection and try again!'
-            }
-            type="error"
-            showIcon
-            closable
-          />
-        )}
+        <Alert
+          style={{ marginBottom: '6px' }}
+          message={SERVERLESS_MESSAGE}
+          type="info"
+          showIcon
+          closable
+        />
         {isRegistered && (
           <Alert
+            style={{ marginBottom: '6px' }}
             message="User registered successfully!!"
             type="success"
             showIcon
